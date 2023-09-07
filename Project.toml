@@ -3,6 +3,11 @@ uuid = "89210afb-bb0f-413a-8ffa-8390a41acbf2"
 authors = ["HettieC <hester.chapman@btinternet.com> and contributors"]
 version = "1.0.0-DEV"
 
+[deps]
+JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
+LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
+RowEchelon = "af85af4c-bcd5-5d23-b03a-a909639aa875"
+
 [compat]
 julia = "1"
 

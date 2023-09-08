@@ -6,6 +6,13 @@ using LinearAlgebra, RowEchelon, JuMP
 
 include("utils.jl")
 
-export blah
+export initialiseR
+export makeBitmap
+export rational_nullspace
+
+export preprocessing
+export main_programme
+export cleanE
+export checkByLP
 
 end

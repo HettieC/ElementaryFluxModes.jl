@@ -13,7 +13,7 @@ S = [
     0 0 0 0 0 0 0 0 0 0 0 1 0 -1 ;
 ]
 
-R = DDStandard(S)
+@time R = DDStandard(S)
 E = checkR(R,S)
 
 
@@ -37,18 +37,22 @@ n - length(zeta) == length(zeta_bar)
 
 S = deserialize("data/EcoliCoreS")
 
-
-@time R = DDAlgorithm(Matrix(S))
-
-findall(x -> x==false,E[:,2])
+@time R = DDStandard(Matrix(S))
+findall(x -> x!=0,R)
 
 
 
 S = Matrix(deserialize("data/pgm_S"))
-@time R = DDAlgorithm(S)
+@time R = DDStandard(S)
 
 S = Matrix(deserialize("data/yeast_S"))
-@time R = DDAlgorithm(S)
+@time R = DDStandard(Matrix(deserialize("data/yeast_S")))
 findall(x->x!=0,R)
 
 round.(rational_nullspace(S)[1])
+
+
+S = deserialize("data/EcoliCore")
+@time R = DDStandard(Matrix(S))
+
+findall(x->x!=0,R)

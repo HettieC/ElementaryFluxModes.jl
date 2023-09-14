@@ -9,7 +9,7 @@ Function to implement the standard DD algorithm, as described in Terzer 2009 the
 extreme rays of a polyhedral cone Ρ = {x ∈ ℜ^d | Ax = 0, x >= 0}. 
 """
 function DDStandard(A::Matrix)
-    ns = round.(rational_nullspace(S)[1])
+    ns = round.(rational_nullspace(A)[1])
     if size(ns,2) == 0 
         ns = nullspace(A)
         if size(ns,2) == 0 

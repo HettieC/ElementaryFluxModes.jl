@@ -2,18 +2,20 @@ module ElementaryFluxModes
 
 # Write your package code here.
 
-using LinearAlgebra
+using LinearAlgebra, RowEchelon
 
-# include("utils.jl")
+include("utils.jl") 
+export make_all_irreversible
+export reversible_EFMs
 # export initialiseR
 # export makeBitmap
-# export rational_nullspace
+export rational_nullspace
 # export preprocessing
 # export main_programme
 # export cleanE
 # export checkByLP
 
-include("DDMethod.jl")
+include("DDStandard.jl")
 export DDStandard
 export checkR
 

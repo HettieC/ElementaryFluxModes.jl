@@ -1,4 +1,4 @@
-using ElementaryModes, Tulip
+using ElementaryFluxModes, Tulip
 using LinearAlgebra, RowEchelon, SparseArrays
 using Serialization
 
@@ -12,6 +12,31 @@ S = [
     0 0 0 0 0 0 -1 0 0 0 0 1 -1 0 ;
     0 0 0 0 0 0 0 0 0 0 0 1 0 -1 ;
 ]
+
+#### make irreversible
+
+
+S = [
+    1 -1 0 -1 0 0 0 0  0 0 0 0 ;
+    0 1 -1 0 -1 0 0 0  0 0 0 0 ;
+    0 0 0 1 1 -1 -1 0  0 0 0 0 ;
+    0 0 0 0 0 0 1 -1 -1 0 0 0 ;
+    0 0 0 0 0 1 0 0 -1 0 0 1 ;
+    0 0 0 0 0 0 0 0 1 -1 0 0 ;
+    0 0 0 0 0 -1 0 0 0 1 -1 0 ;
+    0 0 0 0 0 0 0 0 0 1 0 -1.0 ;
+]
+
+reversible = [5,8]
+
+S_irrev = make_all_irreversible(S,reversible)
+
+
+E = DDStandard(S_irrev)
+E = reversible_EFMs(E,reversible)
+
+E[:,[i for i in size(E,2) if any(x->x!=0,E[:,i])]]
+
 
 @time R = DDStandard(S)
 E = checkR(R,S)

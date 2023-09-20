@@ -8,17 +8,17 @@ Input:
     N1w: N1*(N2*v2) where N1 is the stoichiometric matrix with fixed fluxes removed 
 """
 
-# Initially, do algorithm with no fixed fluxes, aka w = 0
 stoich = copy(S)
 nmetab, nflux = size(stoich)
 ntotal = nmetab + nflux 
 ntab = nflux*2
 m = nflux + 1
-# say that r1 is a fixed flux 
-N2 = stoich[:,1]
-v2 = [1]
-w = N2*v2'
-
+# say that r1 is a fixed flux
+N1 = stoich[:,3:end] 
+N2 = stoich[:,[1,2]]
+v2 = [3,2.1]
+w = N2*v2
+stoich = hcat(N1,w)
 
 tol = 1e-10 #limit for non-zero
 

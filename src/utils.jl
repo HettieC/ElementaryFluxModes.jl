@@ -33,8 +33,45 @@ function reversible_EFMs(E::Matrix{Float64},reversible::Vector{Int64})
     return E[:,[i for i in 1:size(E,2) if !all(x->x==0,E[:,i])]]
 end
 
+"""
+Function to make a convex polyhedron out of a problem with fixed fluxes.
+Input:
+    S: irreversible stoichiometric matrix, aka any reversible reactions have 
+        been split into two irreversible reactions 
+    fixed_fluxes: list of indices of the fixed fluxes
+    flux_values: list of fixed flux values in same order as fixed_fluxes
+Output: 
+    S_convex: stoichiometric matrix with which to implement the DD algorithm
+Note: results of DDStandard need to be transformed to take into account these
+    fixed fluxes, using clean_DD_result
+"""
+function fix_fluxes(S::Matrix{Float64},fixed_fluxes::Vector{Int64},flux_values::Vector{Float64})
+    if length(fixed_fluxes) != length(flux_values)
+        throw("Number of fixed reactions does not match given number of fixed fluxes")
+    end
+    N1 = S[:,[i for i in 1:size(S,2) if i ∉ fixed_fluxes]]
+    N2 = S[:,[i for i in 1:size(S,2) if i ∈ fixed_fluxes]]
+    w = N2*flux_values
+    return hcat(N1,w)
+end
 
-
+"""
+Input: 
+    E: matrix of EFMs that has come from DDStandard(S_convex)
+    fixed_fluxes: same vector of indices of fixed fluxes from the input of fix_fluxes 
+Output:
+    E_cleaned: 
+"""
+function clean_DD_result(E::Matrix{Float64},fixed_fluxes::Vector{Int64},flux_values::Vector{Float64})
+    # last row of E corresponds to the fixed fluxes 
+    fixed_row = E[end,:]
+    #E = [[1:end-1],:]
+    for (r,v) in zip(fixed_fluxes,flux_values)
+        E = [E[1:r-1,:] ; v*fixed_row'; E[r:end,:]]
+    end
+    rescale_value = flux_values[1] / E[fixed_fluxes[1],findfirst(x->x!=0,E[fixed_fluxes[1]])]
+    return E[1:end-1,:]*rescale_value
+end
 
 
 function rational_nullspace(A::Matrix)

@@ -64,7 +64,8 @@ function DDStandardFixedFluxes(A::Matrix,fixed_fluxes::Vector{Int64})
     while ρ != collect(1:d) 
         for j in setdiff(1:d,ρ)
             d,n = size(R)
-            tau_pos = [i for i in 1:n if R[j,i] > 0]
+            tau_pos = findall(i -> R[j,i] > 0, R[j,:])
+            #tau_pos = [i for i in 1:n if R[j,i] > 0]
             tau_0 = [h for h in 1:n if R[j,h] == 0]
             tau_neg = [k for k in 1:n if R[j,k] < 0]
             tau_adj = [(i,k) for i in tau_pos for k in tau_neg if adjacency_test(R[:,i],R[:,k],R)]

@@ -4,9 +4,13 @@ authors = ["HettieC <hester.chapman@btinternet.com> and contributors"]
 version = "1.0.0-DEV"
 
 [deps]
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 RowEchelon = "af85af4c-bcd5-5d23-b03a-a909639aa875"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
+TerminalPager = "0c614874-6106-40ed-a7c2-2f1cd0bff883"
+Tulip = "6dd1b50a-3aae-11e9-10b5-ef983d2400fa"
 
 [compat]
 julia = "1.9"

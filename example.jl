@@ -13,14 +13,14 @@ S = [
     0 0 0 0 0 0 0 0 0 0 0 1 0 -1.0 ;
 ]
 
-ns = round.(rational_nullspace(S)[1])
-nsrref = rref(ns')
-R = nsrref'
-E = DDStandard(S)
+N1 = S[:,2:13]
+N2 = S[:,[1,14]]
+v2 = [1;1]
+N = hcat(N1,N2*v2)
+E = DDStandard(N)
+
 
 #### make irreversible
-
-
 S = [
     1 -1 0 -1 0 0 0 0  0 0 0 0 ;
     0 1 -1 0 -1 0 0 0  0 0 0 0 ;
@@ -85,21 +85,3 @@ round.(rational_nullspace(S)[1])
 
 S = deserialize("data/EcoliCore")
 @time R = DDStandard(Matrix(S))
-
-findall(x->x!=0,R)
-
-
-
-
-
-
-
-function DDAlg(A::Matrix)
-    d,n = size(A)
-    Ad = A[1:d,1:d] # initial step
-    ρ = Int64[]
-    while ρ != collect(1:d)
-
-    end
-
-end

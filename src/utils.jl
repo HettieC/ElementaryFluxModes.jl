@@ -94,6 +94,17 @@ function rational_nullspace(A::Matrix)
 end
 
 
+function remove_linearly_dep_rows(A)
+    rA = rref!(copy(Array(A)))
+    idxs = Int[]
+    for (i,row) in enumerate(eachrow(rA))
+        if !all(abs.(row) .<= 1e-6) # remove rows of all zero
+            push!(idxs, i)
+        end
+    end
+    return rA[idxs, :], idxs
+end
+
 # function makeBitmap(M::Matrix)
 #     mask = Array{Bool}(undef,size(M,1),size(M,2))
 #     for i in 1:size(M,1) 

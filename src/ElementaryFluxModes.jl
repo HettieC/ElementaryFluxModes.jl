@@ -9,6 +9,7 @@ export make_all_irreversible
 export reversible_EFMs
 export fix_fluxes
 export clean_DD_result
+export remove_linearly_dep_rows
 # export initialiseR
 # export makeBitmap
 export rational_nullspace

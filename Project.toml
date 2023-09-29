@@ -6,6 +6,7 @@ version = "1.0.0-DEV"
 [deps]
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 RowEchelon = "af85af4c-bcd5-5d23-b03a-a909639aa875"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"

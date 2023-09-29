@@ -9,7 +9,7 @@ Function to implement the standard DD algorithm, as described in Terzer 2009 the
 extreme rays of a polyhedral cone Ρ = {x ∈ ℜ^d | Ax = 0, x >= 0}. 
 """
 function DDStandard(A::Matrix)
-    ns = round.(rational_nullspace(A)[1])
+    ns = round.(rational_nullspace(A)[1],digits = 6)
     if size(ns,2) == 0 
         ns = nullspace(A)
         if size(ns,2) == 0 
@@ -97,7 +97,7 @@ end
 """ 
 Test if two extreme rays r1 and r2 are adjacent in A, adjacency test from Algorithms in Bioinformatics, p335, Terzer, Stelling, 2006
 """
-function adjacency_test(r1::Vector{Float64},r2::Vector{Float64},A::Matrix{Float64})
+function adjacency_test(r1::Union{Vector{Float64},Vector{Int64}},r2::Union{Vector{Float64},Vector{Int64}},A::Union{Matrix{Float64},Matrix{Int64}})
     zeta = [i for i in 1:length(r1) if r1[i] == 0 && r2[i] == 0]
     if rank(A[zeta,:]) == rank(A)-2
         return true 
@@ -105,5 +105,4 @@ function adjacency_test(r1::Vector{Float64},r2::Vector{Float64},A::Matrix{Float6
         return false
     end
 end
-
 

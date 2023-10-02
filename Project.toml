@@ -4,6 +4,7 @@ authors = ["HettieC <hester.chapman@btinternet.com> and contributors"]
 version = "1.0.0-DEV"
 
 [deps]
+COBREXA = "babc4406-5200-4a30-9033-bf5ae714c842"
 DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 Gurobi = "2e9cd046-0924-5485-92f1-d5272153d98b"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"

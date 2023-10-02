@@ -1,6 +1,5 @@
-##### using ecoli core 
+##### using enzyme constrained ecoli core after pruning
 using COBREXA, Gurobi, ElementaryFluxModes, Serialization, RowEchelon
-
 model = load_model(StandardModel,"data/e_coli_core.json")
 fba_sol = parsimonious_flux_balance_analysis_dict(model,Gurobi.Optimizer)
 
@@ -169,12 +168,13 @@ N2 = N[:,fixed_fluxes]
 w = N2*flux_values
 N1w = hcat(N1,w)
 
-ns = round.(rational_nullspace(N)[1],digits = 6)
+ns = round.(rational_nullspace(N1w)[1],digits = 10)
 nsrref = rref(ns')
 R = round.(nsrref',digits=10) # Get a nullspace
 #R ./= sum(abs.(R), dims=1) 
+R = reorder_ns(R)[1]
 d,n = size(R)
-ρ = [1,2] 
+ρ = [1,2,3] 
 #while ρ != collect(1:d) 
 for j in maximum(ρ):d
     println(j)
@@ -186,9 +186,9 @@ for j in maximum(ρ):d
     tau_adj = [(i,k) for i in tau_pos for k in tau_neg if adjacency_test(R[:,i],R[:,k],R)]
     Rnew = Array{Float64}(undef,d,0)
     for (i,k) in tau_adj
-        p = R[:,i]
-        q = R[:,k]
-        r_ik = p[j]*q - q[j]*p
+        p = R[:,i] # +ve or zero except p[j] +ve
+        q = R[:,k] # +ve or zero except q[j] -ve
+        r_ik = p[j]*q - q[j]*p # +- - -+ 
         # for (a,x) in enumerate(r_ik)
         #     if x < (1e-18)*maximum(r_ik) ## check if this should be zero
         #         r_ik[a] = 0
@@ -233,6 +233,9 @@ for (k, (i,j)) in enumerate(idxs)
     E = vcat(E, R[i:j,:])
     k == length(idxs) || (E = vcat(E, R[end,:]'))
 end
+
+
+N1w*R[:,2]
 
 
 ### visualise these EFMs!

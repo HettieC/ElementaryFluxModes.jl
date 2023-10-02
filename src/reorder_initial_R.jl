@@ -11,23 +11,10 @@ N2 = N[:,fixed_fluxes]
 w = N2*flux_values
 N1w = hcat(N1,w)
 
-ns = round.(rational_nullspace(N)[1],digits = 6)
+ns = round.(rational_nullspace(N1w)[1],digits = 6)
 nsrref = rref(ns')
 R = round.(nsrref',digits=10) # Get a nullspace
-
-perm_vec = Int64[]
-for (i,row) in enumerate(eachrow(R))
-    if length(perm_vec) == size(R,2)
-        append!(perm_vec,[i for i in 1:size(R,1) if i ∉ perm_vec])
-        break
-    else
-        if row == Matrix(1.0I, size(R,2), size(R,2))[length(perm_vec)+1,:]
-            push!(perm_vec,i)
-        end
-    end
-end
-
-R = R[perm_vec,:]
+R = reorder_ns(R)[1]
 
 d,n = size(R)
 ρ = [1,2,3] 

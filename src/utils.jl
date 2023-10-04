@@ -122,7 +122,7 @@ end
 Helper function to reorder the rows of the nullspace so that it is in the form 
 [I; K] 
 """
-function reorder_ns(A::Matrix{Float64})
+function reorder_ns(A::Matrix{Any})
     perm_vec = Int64[]
     for (i,row) in enumerate(eachrow(A))
         if length(perm_vec) == size(A,2)
@@ -136,6 +136,7 @@ function reorder_ns(A::Matrix{Float64})
     end
     return A[perm_vec,:], perm_vec
 end
+
 
 # function makeBitmap(M::Matrix)
 #     mask = Array{Bool}(undef,size(M,1),size(M,2))

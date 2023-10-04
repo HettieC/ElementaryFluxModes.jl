@@ -60,63 +60,6 @@ E = DDStandard(N1w)
 N1w_red*E[:,1] == repeat([0],size(N1w_red,1))
 
 
-
-### using prune_model 
-### using prune_model 
-function prune_model(model::StandardModel, reaction_fluxes::Dict{String,Float64}; atol = 1e-9, verbose = true)
-    pruned_model = StandardModel("pruned_model")
-
-    rxns = Vector{Reaction}()
-    mets = Vector{Metabolite}()
-    gs = Vector{Gene}()
-    mids = String[]
-    gids = String[]
-
-    for rid in reactions(model)
-        abs(reaction_fluxes[rid]) <= atol && continue
-
-        rxn = deepcopy(model.reactions[rid])
-        if reaction_fluxes[rid] > 0
-            rxn.lb = max(0, rxn.lb)
-        else
-            rxn.metabolites = Dict(x => -y for (x,y) in rxn.metabolites)
-            rxn.ub = -model.reactions[rid].lb
-            rxn.lb = max(0, -model.reactions[rid].ub)
-        end
-        push!(rxns, rxn)
-
-        rs = reaction_stoichiometry(model, rid)
-        for mid in keys(rs)
-            push!(mids, mid)
-        end
-        grrs = reaction_gene_association(model, rid)
-        isnothing(grrs) && continue
-        for grr in grrs
-            append!(gids, grr)
-        end
-    end
-
-    for mid in unique(mids)
-        push!(mets, model.metabolites[mid])
-    end
-
-    for gid in unique(gids)
-        push!(gs, model.genes[gid])
-    end
-
-    add_reactions!(pruned_model, rxns)
-    add_metabolites!(pruned_model, mets)
-    add_genes!(pruned_model, gs)
-
-    #: print some info about process
-    if verbose
-        rrn = n_reactions(model) - n_reactions(pruned_model)
-        @info "Removed $rrn reactions."
-    end
-
-    return pruned_model
-end
-
 pmodel = prune_model(model,fba_sol;atol=1e-6)
 flux_balance_analysis_dict(pmodel,Gurobi.Optimizer)
 
@@ -157,9 +100,9 @@ fba_sol[reactions(pmodel)[35]]
 
 
 ##### Enzyme constrained model with two capacity constraints 
-N = deserialize("data/pmodel_S")
+N = deserialize("data/pmodel_S_rat")
 N = remove_linearly_dep_rows(N)[1]
-
+N = rationalize.(N,tol=0.01)
 ### fixed reaction only ATPM, reaction 14
 fixed_fluxes = [14]
 flux_values = [8.39]
@@ -167,12 +110,15 @@ N1 = N[:,setdiff(1:size(N,2),fixed_fluxes)]
 N2 = N[:,fixed_fluxes]
 w = N2*flux_values
 N1w = hcat(N1,w)
-
-ns = round.(rational_nullspace(N1w)[1],digits = 10)
+N1w = rationalize.(N1w,tol=1e-5)
+tol = 1e-10
+#ns = round.(rational_nullspace(N1w)[1],digits = 10)
+ns = rational_nullspace(N1w)[1]
 nsrref = rref(ns')
-R = round.(nsrref',digits=10) # Get a nullspace
+#R = round.(nsrref',digits=13) # Get a nullspace
+R = rationalize.(R,tol=1e-5)
 #R ./= sum(abs.(R), dims=1) 
-R = reorder_ns(R)[1]
+R, row_order = reorder_ns(R)
 d,n = size(R)
 ρ = [1,2,3] 
 #while ρ != collect(1:d) 
@@ -180,6 +126,8 @@ for j in maximum(ρ):d
     println(j)
     d,n = size(R)
     R ./= sum(abs.(R), dims=1)
+    #tau_pos = [i for i in 1:n if R[j,i] > tol]
+    #tau_0 = [h for h in 1:n if 0 <= R[j,h] <= tol]
     tau_pos = [i for i in 1:n if R[j,i] > 0]
     tau_0 = [h for h in 1:n if R[j,h] == 0]
     tau_neg = [k for k in 1:n if R[j,k] < 0]
@@ -209,11 +157,14 @@ for j in maximum(ρ):d
     push!(ρ,j)
 end
 
-
+# reorder R 
+R = R[row_order,:]
 
 # rescale 
-R[:,1] = round.(R[:,1]/R[end,1],digits=12)
-R[:,2] = round.(R[:,2]/R[end,2],digits=12)
+R[:,1] = R[:,1]/R[end,1]
+R[:,2] = R[:,2]/R[end,2]
+# R[:,1] = round.(R[:,1]/R[end,1],digits=16)
+# R[:,2] = round.(R[:,2]/R[end,2],digits=12)
 
 # put fixed fluxes back into correct position
 E = zeros(0, size(R,2))
@@ -245,6 +196,9 @@ model = deserialize("data/pgm")
 
 efm_1_binary = Dict(x => y==0 ? 0 : 1 for (x,y) in zip(reactions(model),E[:,1]))
 efm_2_binary = Dict(x => y==0 ? 0 : 1 for (x,y) in zip(reactions(model),E[:,2]))
+efm_3_binary = Dict(x => y==0 ? 0 : 1 for (x,y) in zip(reactions(model),E[:,3]))
+efm_4_binary = Dict(x => y==0 ? 0 : 1 for (x,y) in zip(reactions(model),E[:,4]))
+
 
 efm_1 = Dict(x => y for (x,y) in zip(reactions(model),E[:,1]))
 efm_2 = Dict(x => y for (x,y) in zip(reactions(model),E[:,2]))
@@ -262,4 +216,10 @@ open("data/efm_1_binary.json", "w") do io
 end
 open("data/efm_2_binary.json", "w") do io
     JSON.print(io, efm_2_binary)
+end
+open("data/efm_3_binary.json", "w") do io
+    JSON.print(io, efm_3_binary)
+end
+open("data/efm_4_binary.json", "w") do io
+    JSON.print(io, efm_4_binary)
 end

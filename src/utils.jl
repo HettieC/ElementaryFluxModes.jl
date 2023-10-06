@@ -120,17 +120,30 @@ end
 
 """
 Helper function to reorder the rows of the nullspace so that it is in the form 
-[I; K] 
+[I; K]. If rational==true, the input matrix and output are rational.
 """
-function reorder_ns(A::Matrix{Any})
+function reorder_ns(A::Matrix;rational=false)
     perm_vec = Int64[]
-    for (i,row) in enumerate(eachrow(A))
-        if length(perm_vec) == size(A,2)
-            append!(perm_vec,[i for i in 1:size(A,1) if i ∉ perm_vec])
-            break
-        else
-            if row == Matrix(1.0I, size(A,2), size(A,2))[length(perm_vec)+1,:]
-                push!(perm_vec,i)
+    if !rational
+        for (i,row) in enumerate(eachrow(A))
+            if length(perm_vec) == size(A,2)
+                append!(perm_vec,[i for i in 1:size(A,1) if i ∉ perm_vec])
+                break
+            else
+                if row == Matrix(1.0I, size(A,2), size(A,2))[length(perm_vec)+1,:]
+                    push!(perm_vec,i)
+                end
+            end
+        end
+    else
+        for (i,row) in enumerate(eachrow(A))
+            if length(perm_vec) == size(A,2)
+                append!(perm_vec,[i for i in 1:size(A,1) if i ∉ perm_vec])
+                break
+            else
+                if row == Matrix(1.0I, size(A,2), size(A,2))[length(perm_vec)+1,:]
+                    push!(perm_vec,i)
+                end
             end
         end
     end

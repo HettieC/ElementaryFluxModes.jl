@@ -97,12 +97,12 @@ fba_sol = flux_balance_analysis_dict(pmodel,Tulip.Optimizer)
 
 fba_sol[reactions(pmodel)[35]]
 
-
+model = deserialize("data/pgm")
 
 ##### Enzyme constrained model with two capacity constraints 
 N = deserialize("data/pmodel_S_rat")
 N = remove_linearly_dep_rows(N)[1]
-N = rationalize.(N,tol=0.01)
+N = rationalize.(N,tol=0.00001)
 ### fixed reaction only ATPM, reaction 14
 fixed_fluxes = [14]
 flux_values = [8.39]
@@ -111,37 +111,28 @@ N2 = N[:,fixed_fluxes]
 w = N2*flux_values
 N1w = hcat(N1,w)
 N1w = rationalize.(N1w,tol=1e-5)
-tol = 1e-10
-#ns = round.(rational_nullspace(N1w)[1],digits = 10)
 ns = rational_nullspace(N1w)[1]
 nsrref = rref(ns')
-#R = round.(nsrref',digits=13) # Get a nullspace
-R = rationalize.(R,tol=1e-5)
+R = rationalize.(nsrref',tol=1e-8)
 #R ./= sum(abs.(R), dims=1) 
-R, row_order = reorder_ns(R)
+R, row_order = reorder_ns(R;rational=true)
 d,n = size(R)
 ρ = [1,2,3] 
 #while ρ != collect(1:d) 
 for j in maximum(ρ):d
     println(j)
     d,n = size(R)
-    R ./= sum(abs.(R), dims=1)
-    #tau_pos = [i for i in 1:n if R[j,i] > tol]
-    #tau_0 = [h for h in 1:n if 0 <= R[j,h] <= tol]
+#    R ./= sum(abs.(R), dims=1)
     tau_pos = [i for i in 1:n if R[j,i] > 0]
     tau_0 = [h for h in 1:n if R[j,h] == 0]
     tau_neg = [k for k in 1:n if R[j,k] < 0]
     tau_adj = [(i,k) for i in tau_pos for k in tau_neg if adjacency_test(R[:,i],R[:,k],R)]
     Rnew = Array{Float64}(undef,d,0)
     for (i,k) in tau_adj
+        println("i: $i, k: $k")
         p = R[:,i] # +ve or zero except p[j] +ve
         q = R[:,k] # +ve or zero except q[j] -ve
-        r_ik = p[j]*q - q[j]*p # +- - -+ 
-        # for (a,x) in enumerate(r_ik)
-        #     if x < (1e-18)*maximum(r_ik) ## check if this should be zero
-        #         r_ik[a] = 0
-        #     end
-        # end
+        r_ik = rationalize.(p[j]*q,tol=1e-8) - rationalize.(q[j]*p,tol=1e-8) # +- - -+ 
         Rnew = hcat(Rnew,r_ik)
     end
     Rnew ./= sum(abs.(Rnew), dims=1) 

@@ -74,7 +74,7 @@ function clean_DD_result(E::Matrix{Float64},fixed_fluxes::Vector{Int64},flux_val
 end
 
 
-function rational_nullspace(A::Matrix)
+function rational_nullspace(A::Matrix; tol=norm(A,Inf)*eps(Float64))
     m,n = size(A)
     R, pivotrows = rref_with_pivots(A)
     r = length(pivotrows)
@@ -88,6 +88,12 @@ function rational_nullspace(A::Matrix)
         end
         if r > 0 
             Z[pivotrows,:] = -R[1:r, nopiv]
+        end
+    end
+
+    for (i,x) in enumerate(R) 
+        if abs(x) < tol
+            R[i] = 0
         end
     end
     return Z, pivotrows
@@ -122,28 +128,15 @@ end
 Helper function to reorder the rows of the nullspace so that it is in the form 
 [I; K]. If rational==true, the input matrix and output are rational.
 """
-function reorder_ns(A::Matrix;rational=false)
+function reorder_ns(A::Matrix)
     perm_vec = Int64[]
-    if !rational
-        for (i,row) in enumerate(eachrow(A))
-            if length(perm_vec) == size(A,2)
-                append!(perm_vec,[i for i in 1:size(A,1) if i ∉ perm_vec])
-                break
-            else
-                if row == Matrix(1.0I, size(A,2), size(A,2))[length(perm_vec)+1,:]
-                    push!(perm_vec,i)
-                end
-            end
-        end
-    else
-        for (i,row) in enumerate(eachrow(A))
-            if length(perm_vec) == size(A,2)
-                append!(perm_vec,[i for i in 1:size(A,1) if i ∉ perm_vec])
-                break
-            else
-                if row == Matrix(1.0I, size(A,2), size(A,2))[length(perm_vec)+1,:]
-                    push!(perm_vec,i)
-                end
+    for (i,row) in enumerate(eachrow(A))
+        if length(perm_vec) == size(A,2)
+            append!(perm_vec,[i for i in 1:size(A,1) if i ∉ perm_vec])
+            break
+        else
+            if row == Matrix(1.0I, size(A,2), size(A,2))[length(perm_vec)+1,:]
+                push!(perm_vec,i)
             end
         end
     end

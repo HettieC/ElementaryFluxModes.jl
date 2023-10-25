@@ -1,21 +1,25 @@
 #################################################################
 ##### Enzyme constrained model with two capacity constraints #### 
-N = Matrix(stoichiometry(model))
+##### using enzyme constrained ecoli core after pruning #########
+using Revise, COBREXA, Gurobi, ElementaryFluxModes, Serialization
+using JSON, RowEchelon, LinearAlgebra
+
+N = deserialize("data/models/pmodel_S")
 N = remove_linearly_dep_rows(N)[1]
+model = deserialize("data/models/pgm")
+fba_sol = flux_balance_analysis_dict(model,Tulip.Optimizer)
 #N = rationalize.(N,tol=0.00001)
-### fixed reaction only ATPM, reaction 14
-fixed_fluxes = [14]
-flux_values = [8.39]
+### fixed reaction only ATPM, reaction 14, and biomass rxn 19
+fixed_fluxes = [14,19]
+flux_values = [8.39,0.16112216830713108]
 N1 = N[:,setdiff(1:size(N,2),fixed_fluxes)]
 N2 = N[:,fixed_fluxes]
 w = N2*flux_values
 N1w = hcat(N1,w)
-#N1w = rationalize.(N1w,tol=1e-5)
 ns = rational_nullspace(N1w)[1]
 nsrref = rref(ns')
 R = Matrix(nsrref')
-#R = rationalize.(nsrref',tol=1e-8)
-#R ./= sum(abs.(R), dims=1) 
+# make small entries zero
 for (i,x) in enumerate(R) 
     if abs(x) < norm(R,Inf)*eps(Float64)
         R[i] = 0
@@ -24,11 +28,9 @@ end
 R, row_order = reorder_ns(R)
 d,n = size(R)
 ρ = [1,2,3] 
-#while ρ != collect(1:d) 
 for j in maximum(ρ):d
     println(j)
     d,n = size(R)
-#    R ./= sum(abs.(R), dims=1)
     tau_pos = [i for i in 1:n if R[j,i] > norm(R,Inf)*eps(Float64)]
     tau_0 = [h for h in 1:n if abs(R[j,h]) <= norm(R,Inf)*eps(Float64)]
     tau_neg = [k for k in 1:n if R[j,k] < -norm(R,Inf)*eps(Float64)]
@@ -39,11 +41,9 @@ for j in maximum(ρ):d
         println("i: $i, k: $k")
         p = R[:,i] 
         q = R[:,k] 
-        #r_ik = rationalize.(p[j]*q,tol=1e-8) - rationalize.(q[j]*p,tol=1e-8) # +- - -+ 
         r_ik = p[j]*q - q[j]*p
         Rnew = hcat(Rnew,r_ik)
     end
-    #Rnew ./= sum(abs.(Rnew), dims=1) 
     Rtemp = Array{Float64}(undef,d,0)
     for i in tau_pos
         Rtemp = hcat(Rtemp,R[:,i])
@@ -58,7 +58,6 @@ for j in maximum(ρ):d
             R[i] = 0
         end
     end
-    push!(ρ,j)
 end
 
 # put fixed fluxes back into correct position
@@ -80,14 +79,18 @@ for (k, (i,j)) in enumerate(idxs)
     k == length(idxs) || (E = vcat(E, R[end,:]'))
 end
 
-efm1 = Dict(split(x,"#";limit=2)[1] => y for (x,y) in zip(reactions(model)[row_order],E[:,1]))
-efm2 = Dict(split(x,"#";limit=2)[1] => y for (x,y) in zip(reactions(model)[row_order],E[:,2]))
-efm3 = Dict(split(x,"#";limit=2)[1] => y for (x,y) in zip(reactions(model)[row_order],E[:,3]))
-efm4 = Dict(split(x,"#";limit=2)[1] => y for (x,y) in zip(reactions(model)[row_order],E[:,4]))
 
-for (i,e) in enumerate([efm1, efm2, efm3, efm4])
-    open("data/emf_N1w_gecko$(i).json","w") do io 
+### visualise these EFMs!
+efm_1 = Dict(x => y for (x,y) in zip(reactions(model.inner)[row_order],R[:,1]))
+efm_2 = Dict(x => y for (x,y) in zip(reactions(model.inner)[row_order],R[:,2]))
+efm_3 = Dict(x => y for (x,y) in zip(reactions(model.inner)[row_order],R[:,3]))
+efm_4 = Dict(x => y for (x,y) in zip(reactions(model.inner)[row_order],R[:,4]))
+
+
+for (i,e) in enumerate([efm_1, efm_2, efm_3, efm_4])
+    open("data/efms/emf_N$(i).json","w") do io 
         JSON.print(io,e)
     end
 end
 
+maximum(abs.(N[:,row_order]*R[:,4]))

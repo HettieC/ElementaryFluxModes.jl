@@ -143,7 +143,7 @@ function reorder_ns(A::Matrix)
     return A[perm_vec,:], perm_vec
 end
 
-
+### Gagneur Klamt
 # function makeBitmap(M::Matrix)
 #     mask = Array{Bool}(undef,size(M,1),size(M,2))
 #     for i in 1:size(M,1) 
@@ -152,7 +152,7 @@ end
 #     return mask
 # end
 
-
+### Gagneur Klamt
 # function main_alg(R, q, p)
 #     qsplit = q 
 #     R1 = makeBitmap(R[1:qsplit-m,:])

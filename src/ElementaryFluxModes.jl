@@ -22,8 +22,10 @@ export rational_nullspace
 
 include("DDStandard.jl")
 export DDStandard
+export DDStandardIteration
 export checkR
 export adjacency_test
+export adjacency_test_2
 export DDStandardFixedFluxes
 
 end

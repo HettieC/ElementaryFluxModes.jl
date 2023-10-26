@@ -45,7 +45,7 @@ for (i,r) in enumerate(eachcol(R))
     E[:,i] = mode
 end
 
-# put fixed rxns in correct positions
+# put fixed fluxes in correct positions
 EFMs = zeros(0, size(R,2))
 idxs = Tuple[]
 k = 1
@@ -63,22 +63,18 @@ for (k, (i,j)) in enumerate(idxs)
     EFMs = vcat(EFMs, E[i:j,:])
     k == length(idxs) || (EFMs = vcat(EFMs, E[end,:]'))
 end
-
-
-
-### put correct number into ATPM and biomass using the Schuster Schuster formula
-### using N1w, N2, v1, v2
-
-
-
+EFMs[fixed_fluxes,:] = EFMs[fixed_fluxes,:].*flux_values
 
 
 efm_1 = Dict(x => y for (x,y) in zip(reactions(model.inner),EFMs[:,1]))
 efm_2 = Dict(x => y for (x,y) in zip(reactions(model.inner),EFMs[:,2]))
 efm_3 = Dict(x => y for (x,y) in zip(reactions(model.inner),EFMs[:,3]))
+efm_4 = Dict(x => y for (x,y) in zip(reactions(model.inner),EFMs[:,4]))
 
-for (i,e) in enumerate([efm_1, efm_2, efm_3])
+
+for (i,e) in enumerate([efm_1, efm_2, efm_3, efm_4])
     open("data/efms/3emf$(i).json","w") do io 
         JSON.print(io,e)
     end
 end
+

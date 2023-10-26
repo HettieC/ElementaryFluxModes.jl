@@ -6,5 +6,8 @@ using Test
     @testset "Standard double dispatch EFMs" begin
         include("ddstandard.jl")
     end
-    # binary trees...
+    # binary
+    @testset "Binary implementation of double dispatch EFMs" begin 
+        include("ddbinary.jl")
+    end
 end

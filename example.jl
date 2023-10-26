@@ -13,11 +13,11 @@ S = [
     0 0 0 0 0 0 0 0 0 0 0 1 0 -1.0 ;
 ]
 
-N1 = S[:,2:13]
-N2 = S[:,[1,14]]
-v2 = [1;1]
-N = hcat(N1,N2*v2)
-E = DDStandard(N)
+E = DDStandard(S)
+ns = rational_nullspace(S)[1]
+nsrref = rref(ns')
+K,row_order = reorder_ns(Matrix(nsrref'))
+E2 = DDBinary(S[:,row_order],K)
 
 
 #### make irreversible

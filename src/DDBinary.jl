@@ -1,3 +1,8 @@
+"""
+Return a bitmap of the input vector, where entries are 1 if the vector entry is 
+greater than zero, and zero if the entries are zero. 
+Return an error if any entries of the vector are less than zero.
+"""
 function make_bitmap(row)
     bitmap = Bool[]
     for x in row
@@ -5,6 +10,8 @@ function make_bitmap(row)
             push!(bitmap,true)
         elseif x == 0 
             push!(bitmap,false)
+        else 
+            throw(DomainError(x, "argument for `make_bitmap` must be nonnegative"))
         end
     end
     return 1*bitmap 
@@ -38,7 +45,7 @@ K initial nullspace in the form [I;K*]
 Output:
 R binary elementary flux modes 
 """
-function BinaryDD(N,K)
+function DDBinary(N,K)
     R_binary = Matrix(1*I(size(K,2)))
     already_pos = size(K,2)
     R_remaining = K[size(R_binary,1)+1:end,:]

@@ -111,18 +111,6 @@ function remove_linearly_dep_rows(A)
     return rA[idxs, :], idxs
 end
 
-"""
-Test the adjacency of two extreme rays 'r1', 'r2', where 'K' is the list of already 
-checked row indices, 'd' is the total number of row indices to be checked
-"""
-function fast_adjacency(r1::Vector{Float64},r2::Vector{Float64},K::Vector{Int64},d::Int64)
-    zeta = [i for i in 1:length(r1) if r1[i] == 0 && r2[i] == 0]
-    if length(intersect(zeta,K)) >= d - 2
-        return true
-    else
-        return false
-    end
-end
 
 """
 Helper function to reorder the rows of the nullspace so that it is in the form 

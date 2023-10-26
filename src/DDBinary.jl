@@ -16,17 +16,22 @@ function make_bitmap(row)
     end
     return 1*bitmap 
 end
-zero_set(vec) = [i for (i,x) in enumerate(vec) if x==0] # make bit set zero set
+
+"""
+Return the zero set of a vector
+"""
+zero_set(vec) = [i for (i,x) in enumerate(vec) if x==0] 
 
 
 """
-Check adjacency of columns i and j in r
+Check adjacency of columns i and j in r by making sure that there exists no other 
+extreme ray in R whose zero set is a superset of the intersection of the zero sets 
+of ray i and ray j.
 """
 function check_adjacency(i,j,R)
     z1 = zero_set(R[:,i])
     z2 = zero_set(R[:,j])
     z = intersect(z1,z2)
-    ### check that no zero set of any other ray in R contains z
     adj = true
     for col in eachcol(R[:,1:end .∉ [[i,j]]])
         if issubset(z,zero_set(col))
@@ -50,39 +55,35 @@ function DDBinary(N,K)
     already_pos = size(K,2)
     R_remaining = K[size(R_binary,1)+1:end,:]
     R = copy(K)
-    for k in 1:size(N,2)
+    for k in 1:size(N,2) # iterate through every reaction and ensure that the EFMs are non-negative
         k <= already_pos && continue
         if all(x->x>=0,R[k,:]) ## non-negativity already satisfied
             R_binary = vcat(R_binary,make_bitmap(R[k,:])')
             R_remaining = R_remaining[2:end,:]
             R = vcat(R_binary,R_remaining)
         else ## remove negative columns and create new rays from
-            ## adjacent negative and positive rays
-            neg = [i for (i,x) in enumerate(R[k,:]) if x<0]
-            pos = [i for (i,x) in enumerate(R[k,:]) if x>0]
+             ## adjacent negative and positive rays
+            tau_neg = [i for (i,x) in enumerate(R[k,:]) if x<0]
+            tau_pos = [i for (i,x) in enumerate(R[k,:]) if x>0]
             R = vcat(R_binary,R_remaining)
-            #### if only three vectors then all must be adjacte, speed up!
-            adj = Tuple[]
-            for i in pos 
-                for j in neg
-                    if check_adjacency(i,j,R)
-                        push!(adj,(i,j))
-                    end
-                end
+            if size(R,2) <= 3 # if only two or three rays they must all be adjacent
+                adj = [(i,j) for i in tau_pos for j in tau_neg]
+            else 
+                adj = [(i,j) for i in tau_pos for j in tau_neg if check_adjacency(i,j,R)]
             end
-            new_cols = Matrix(undef,size(N,2),0)
+            new_cols = Matrix(undef,size(N,2),0) # create new columns with non-negative combination
+            # of one positive and one negative ray
             for (i,j) in adj 
                 new_cols = hcat(
                     new_cols, 
                     (R[:,i][k])*R[:,j] - (R[:,j][k])*R[:,i]
                 )
-                #new_cols = hcat(new_cols,[x+y for (x,y) in zip(R[:,i],R[:,j])]) ### combining maybe needs to be same as original alg?
-            end
-            R = R[:,setdiff(1:size(R,2),neg)]
-            R = hcat(R,new_cols)
-            R_binary = reduce(hcat,(make_bitmap.(eachcol(R[1:k,:]))))
+            end #Q: is list/matrix comprehension faster? 
+            R = R[:,setdiff(1:size(R,2),tau_neg)] # remove negative columns
+            R = hcat(R,new_cols) # add the new columns
+            R_binary = reduce(hcat,(make_bitmap.(eachcol(R[1:k,:])))) #binarise the 1:k rows of R
             R_remaining = R[k+1:end,:]
-            R = vcat(R_binary,R_remaining)
+            R = vcat(R_binary,R_remaining) #Q: better to keep separate? better to never separate?
         end
     end
     return R 

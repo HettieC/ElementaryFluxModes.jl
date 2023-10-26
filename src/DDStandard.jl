@@ -1,21 +1,15 @@
-### Implementation of the double description method.
-### Input: Matrix A, defining a polyhedral cone Ρ = {x ∈ ℜ^d | Ax = 0, x >= 0}
-### Output: Matrix R, extreme rays of Ρ = {x ∈ ℜ^d | x = Rc, c >= 0}
-
-
-### To do: Bit mask the rays for speed
 """
 Function to implement the standard DD algorithm, as described in Terzer 2009 thesis, to find 
 extreme rays of a polyhedral cone Ρ = {x ∈ ℜ^d | Ax = 0, x >= 0}. 
 Input
-    A: the stoichiometric matrix with only forward reactions, so if any fluxes are fixed 
+    A: the stoichiometric matrix with only forward reactions. If any fluxes are fixed 
         then A has the form [N1 w] where N1 is the stoichiometric matrix for non-fixed fluxes,
-        and w is the columns of fixed fluxes multiplied by their flux values.#
-    row_order: permutation vector of the rows of the nullspace, matching reactions names to 
-        fluxes needs to be done using this row_order
-Output
+        and w is the columns of fixed fluxes multiplied by their flux values.
+    Output
     R: an n x K matrix containing K EFMs, fixed fluxes need to be put into the correct 
         position in postprocessing.
+    row_order: permutation vector of the rows of the nullspace, matching reactions names to 
+        fluxes needs to be done using this row_order
 """
 function DDStandard(A::Matrix)
     ns = round.(rational_nullspace(A)[1],digits = 6)
@@ -30,8 +24,6 @@ function DDStandard(A::Matrix)
     R, row_order = reorder_ns(R) # put I matrix at start of R
     d,n = size(R)
     for j in n+1:d # first n rows of R are guaranteed >=0 from reordering 
-        # println("$(j)th iteration. \n row j-1")
-        # println(round.(R[j,:],digits=5))
         d,n = size(R)
         tau_pos = [i for i in 1:n if R[j,i] > 0]
         # can be sped up if all cols are pos or zero
@@ -54,8 +46,6 @@ function DDStandard(A::Matrix)
         end
         Rtemp = hcat(Rtemp,Rnew)
         R = Rtemp
-        # println("row $j after iteration")
-        # println(round.(R[j,:],digits=5))
     end
     return R, row_order
 end 

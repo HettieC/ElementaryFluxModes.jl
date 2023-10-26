@@ -26,7 +26,6 @@
         1.0   0.0  -1.0  0.0  -1.0  1.0;
         1.0   0.0  -1.0  0.0  -1.0  1.0;
         1.0   0.0  -1.0  0.0  -1.0  1.0;
-
     ]
     RToy = [
         1  0  0  1  1  1  1  0  1;
@@ -44,7 +43,7 @@
         1  0  1  0  1  0  0  0  0;
         1  0  1  0  1  0  0  0  0;
     ]
-    @test all(col -> col ∈ eachcol(RToy), DDBinary(SToy,KToy)) 
+    @test all(col -> col ∈ eachcol(RToy), eachcol(DDBinary(SToy,KToy))) 
 end
 
 @testset "Core model" begin

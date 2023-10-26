@@ -27,7 +27,7 @@
         1.0  1.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0;
         1.0  1.0  1.0  0.0  0.0  0.0  0.0  0.0  0.0;
     ]
-    @test all(col -> col ∈ eachcol(R), DDStandard(S)) 
+    @test all(col -> col ∈ eachcol(R), eachcol(DDStandard(S)[1])) 
 end
 
 @testset "Core model" begin

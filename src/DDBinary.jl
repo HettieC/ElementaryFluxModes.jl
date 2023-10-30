@@ -74,9 +74,11 @@ function DDBinary(N,K)
             new_cols = Matrix(undef,size(N,2),0) # create new columns with non-negative combination
             # of one positive and one negative ray
             for (i,j) in adj 
+                p = copy(R[:,i])
+                q = copy(R[:,j])
                 new_cols = hcat(
                     new_cols, 
-                    (R[:,i][k])*R[:,j] - (R[:,j][k])*R[:,i]
+                    (p[k])*q - (q[k])*p
                 )
             end #Q: is list/matrix comprehension faster? 
             R = R[:,setdiff(1:size(R,2),tau_neg)] # remove negative columns

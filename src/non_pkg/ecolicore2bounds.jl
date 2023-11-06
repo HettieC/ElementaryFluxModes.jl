@@ -16,6 +16,7 @@ N1 = N[:,setdiff(1:size(N,2),fixed_fluxes)]
 N2 = N[:,fixed_fluxes]
 w = N2*flux_values
 N1w = hcat(N1,w)
+serialize("data/models/2boundsN1w",N1w)
 ns = rational_nullspace(N1w)[1]
 nsrref = rref(ns')
 R = Matrix(nsrref')

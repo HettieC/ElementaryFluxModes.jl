@@ -1,4 +1,4 @@
-function prune_model(model::StandardModel, reaction_fluxes::Dict{String,Float64}; atol = 1e-9, verbose = true)
+function prune_model(model::StandardModel, reaction_fluxes::Dict{String,Float64}; make_forward = true, atol = 1e-9, verbose = true)
     pruned_model = StandardModel("pruned_model")
 
     rxns = Vector{Reaction}()
@@ -13,10 +13,12 @@ function prune_model(model::StandardModel, reaction_fluxes::Dict{String,Float64}
         rxn = deepcopy(model.reactions[rid])
         if reaction_fluxes[rid] > 0
             rxn.lb = max(0, rxn.lb)
-        else
+        elseif make_forward
             rxn.metabolites = Dict(x => -y for (x,y) in rxn.metabolites)
             rxn.ub = -model.reactions[rid].lb
             rxn.lb = max(0, -model.reactions[rid].ub)
+        else
+            rxn.ub = min(0, rxn.ub)
         end
         push!(rxns, rxn)
 

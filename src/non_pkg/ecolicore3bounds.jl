@@ -77,4 +77,3 @@ for (i,e) in enumerate([efm_1, efm_2, efm_3, efm_4])
         JSON.print(io,e)
     end
 end
-

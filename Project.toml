@@ -13,10 +13,8 @@ LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
 NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"
 Nemo = "2edaba10-b0f1-5616-af89-8c11ac63239a"
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 RowEchelon = "af85af4c-bcd5-5d23-b03a-a909639aa875"
 SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-TerminalPager = "0c614874-6106-40ed-a7c2-2f1cd0bff883"
 Tulip = "6dd1b50a-3aae-11e9-10b5-ef983d2400fa"
 
 [compat]

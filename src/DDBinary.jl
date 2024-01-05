@@ -55,7 +55,7 @@ function DDBinary(N, K)
     already_pos = size(K, 2)
     R_remaining = K[size(R_binary, 1)+1:end, :]
     R = copy(K)
-    for k = 1:size(N, 2) # iterate through every reaction and ensure that the EFMs are non-negative
+    for k in 1:size(N, 2) # iterate through every reaction and ensure that the EFMs are non-negative
         k <= already_pos && continue
         if all(x -> x >= 0, R[k, :]) ## non-negativity already satisfied
             R_binary = vcat(R_binary, make_bitmap(R[k, :])')

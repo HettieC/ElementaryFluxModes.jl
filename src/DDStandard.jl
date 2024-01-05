@@ -23,12 +23,12 @@ function DDStandard(A::Matrix)
     R = Matrix(nsrref')
     R, row_order = reorder_ns(R) # put I matrix at start of R
     d, n = size(R)
-    for j = n+1:d # first n rows of R are guaranteed >=0 from reordering 
+    for j in n+1:d # first n rows of R are guaranteed >=0 from reordering 
         d, n = size(R)
-        tau_pos = [i for i = 1:n if R[j, i] > 0]
+        tau_pos = [i for i in 1:n if R[j, i] > 0]
         # can be sped up if all cols are pos or zero
-        tau_0 = [h for h = 1:n if R[j, h] == 0]
-        tau_neg = [k for k = 1:n if R[j, k] < 0]
+        tau_0 = [h for h in 1:n if R[j, h] == 0]
+        tau_neg = [k for k in 1:n if R[j, k] < 0]
         tau_adj = [
             (i, k) for i in tau_pos for
             k in tau_neg if rank_adjacency_test(R[:, i], R[:, k], R)
@@ -62,7 +62,7 @@ function rank_adjacency_test(
     r2::Union{Vector{Float64},Vector{Int64}},
     A::Union{Matrix{Float64},Matrix{Int64}},
 )
-    zeta = [i for i = 1:length(r1) if r1[i] == 0 && r2[i] == 0]
+    zeta = [i for i in 1:length(r1) if r1[i] == 0 && r2[i] == 0]
     if rank(A[zeta, :]) == rank(A) - 2
         return true
     else

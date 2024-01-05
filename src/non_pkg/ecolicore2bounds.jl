@@ -29,12 +29,12 @@ end
 R, row_order = reorder_ns(R)
 d, n = size(R)
 ρ = [1, 2, 3]
-for j = maximum(ρ):d
+for j in maximum(ρ):d
     println(j)
     d, n = size(R)
-    tau_pos = [i for i = 1:n if R[j, i] > norm(R, Inf) * eps(Float64)]
-    tau_0 = [h for h = 1:n if abs(R[j, h]) <= norm(R, Inf) * eps(Float64)]
-    tau_neg = [k for k = 1:n if R[j, k] < -norm(R, Inf) * eps(Float64)]
+    tau_pos = [i for i in 1:n if R[j, i] > norm(R, Inf) * eps(Float64)]
+    tau_0 = [h for h in 1:n if abs(R[j, h]) <= norm(R, Inf) * eps(Float64)]
+    tau_neg = [k for k in 1:n if R[j, k] < -norm(R, Inf) * eps(Float64)]
     tau_adj =
         [(i, k) for i in tau_pos for k in tau_neg if adjacency_test(R[:, i], R[:, k], R)]
     Rnew = Array{Float64}(undef, d, 0)

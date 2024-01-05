@@ -30,7 +30,7 @@ function reversible_EFMs(E::Matrix{Float64}, reversible::Vector{Int64})
         end
     end
     E = E[1:end-length(reversible), :]
-    return E[:, [i for i = 1:size(E, 2) if !all(x -> x == 0, E[:, i])]]
+    return E[:, [i for i in 1:size(E, 2) if !all(x -> x == 0, E[:, i])]]
 end
 
 """
@@ -53,8 +53,8 @@ function fix_fluxes(
     if length(fixed_fluxes) != length(flux_values)
         throw("Number of fixed reactions does not match given number of fixed fluxes")
     end
-    N1 = S[:, [i for i = 1:size(S, 2) if i ∉ fixed_fluxes]]
-    N2 = S[:, [i for i = 1:size(S, 2) if i ∈ fixed_fluxes]]
+    N1 = S[:, [i for i in 1:size(S, 2) if i ∉ fixed_fluxes]]
+    N2 = S[:, [i for i in 1:size(S, 2) if i ∈ fixed_fluxes]]
     w = N2 * flux_values
     return hcat(N1, w)
 end
@@ -129,7 +129,7 @@ function reorder_ns(A::Matrix)
     perm_vec = Int64[]
     for (i, row) in enumerate(eachrow(A))
         if length(perm_vec) == size(A, 2)
-            append!(perm_vec, [i for i = 1:size(A, 1) if i ∉ perm_vec])
+            append!(perm_vec, [i for i in 1:size(A, 1) if i ∉ perm_vec])
             break
         else
             if row == Matrix(1.0I, size(A, 2), size(A, 2))[length(perm_vec)+1, :]

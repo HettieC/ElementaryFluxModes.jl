@@ -7,7 +7,7 @@ using Test
         include("ddstandard.jl")
     end
     # binary
-    @testset "Binary implementation of double dispatch EFMs" begin 
+    @testset "Binary implementation of double dispatch EFMs" begin
         include("ddbinary.jl")
     end
 end

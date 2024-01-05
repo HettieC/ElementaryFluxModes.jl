@@ -27,20 +27,19 @@ function DDStandard(A::Matrix)
         d, n = size(R)
         tau_pos = [i for i in 1:n if R[j, i] > 0]
         # can be sped up if all cols are pos or zero
-        tau_0 = [h for h in 1:n if R[j, h] == 0]
-        tau_neg = [k for k in 1:n if R[j, k] < 0]
+        tau_0 = [i for i in 1:n if R[j, i] == 0]
+        tau_neg = [i for i in 1:n if R[j, i] < 0]
         tau_adj = [
             (i, k) for i in tau_pos for
             k in tau_neg if rank_adjacency_test(R[:, i], R[:, k], R)
         ]
-        Rnew = Array{Float64}(undef, d, 0)
-        for (i, k) in tau_adj
+        Rnew = Array{Float64}(undef, d, length(tau_adj))
+        for (colidx, (i, k)) in enumerate(tau_adj)
             p = R[:, i]
             q = R[:, k]
-            r_ik = p[j] * q - q[j] * p
-            Rnew = hcat(Rnew, r_ik)
+            Rnew[:,colidx] = p[j] * q - q[j] * p
         end
-        Rtemp = Array{Float64}(undef, d, 0)
+        #=Rtemp = Array{Float64}(undef, d, 0)
         for i in tau_pos
             Rtemp = hcat(Rtemp, R[:, i])
         end
@@ -48,11 +47,13 @@ function DDStandard(A::Matrix)
             Rtemp = hcat(Rtemp, R[:, h])
         end
         Rtemp = hcat(Rtemp, Rnew)
+        =#
+        Rtemp = hcat(R[:, tau_pos], R[:, tau_0], Rnew)
+
         R = Rtemp
     end
     return R, row_order
 end
-
 
 """ 
 Check if two extreme rays r1 and r2 are adjacent in A, using the rank adjacency test from Algorithms in Bioinformatics, p335, Terzer, Stelling, 2006

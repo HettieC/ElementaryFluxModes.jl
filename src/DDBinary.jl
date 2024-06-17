@@ -1,4 +1,15 @@
 """
+$(TYPEDSIGNATURES)
+
+Calculate elementary flux modes for a pruned model.
+"""
+function get_efms(pruned_model::StandardModel,biomass_id,atpm_id,flux_solution)
+
+end
+
+"""
+$(TYPEDSIGNATURES)
+
 Return a bitmap of the input vector, where entries are 1 if the vector entry is 
 greater than zero, and zero if the entries are zero. 
 Return an error if any entries of the vector are less than zero.
@@ -17,38 +28,16 @@ function make_bitmap(row)
     return 1*bitmap 
 end
 
-"""
-Return the zero set of a vector
-"""
-zero_set(vec) = [i for (i,x) in enumerate(vec) if x==0] 
-
-
-"""
-Check adjacency of columns i and j in r by making sure that there exists no other 
-extreme ray in R whose zero set is a superset of the intersection of the zero sets 
-of ray i and ray j.
-"""
-function check_adjacency(i,j,R)
-    z1 = zero_set(R[:,i])
-    z2 = zero_set(R[:,j])
-    z = intersect(z1,z2)
-    adj = true
-    for col in eachcol(R[:,1:end .∉ [[i,j]]])
-        if issubset(z,zero_set(col))
-            adj = false
-            break
-        end
-    end
-    return adj
-end
-
 
 """ 
-Input: 
-N stoichiometric matrix 
-K initial nullspace in the form [I;K*] 
+$(TYPEDSIGNATURES)
+
+Implement the Double Description method in binary form.
+The input variables are:
+-N: stoichiometric matrix, where all reaction directions have already been fixed so that reactions are in the forward direction
+-K: initial nullspace of N, in the form [I;K*] 
 Output:
-R binary elementary flux modes 
+-R: binary elementary flux modes 
 """
 function DDBinary(N,K)
     R_binary = Matrix(1*I(size(K,2)))
@@ -89,4 +78,32 @@ function DDBinary(N,K)
         end
     end
     return R 
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return the zero set of a vector
+"""
+zero_set(vec) = [i for (i,x) in enumerate(vec) if x==0] 
+
+"""
+$(TYPEDSIGNATURES)
+
+Check adjacency of columns i and j in r by making sure that there exists no other 
+extreme ray in R whose zero set is a superset of the intersection of the zero sets 
+of ray i and ray j.
+"""
+function check_adjacency(i,j,R)
+    z1 = zero_set(R[:,i])
+    z2 = zero_set(R[:,j])
+    z = intersect(z1,z2)
+    adj = true
+    for col in eachcol(R[:,1:end .∉ [[i,j]]])
+        if issubset(z,zero_set(col))
+            adj = false
+            break
+        end
+    end
+    return adj
 end

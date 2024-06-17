@@ -1,6 +1,7 @@
 module ElementaryFluxModes
 
 using LinearAlgebra, RowEchelon
+using DocStringExtensions
 
 include("utils.jl") 
 export reorder_ns

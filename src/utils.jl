@@ -1,4 +1,6 @@
 """
+$(TYPEDSIGNATURES)
+
 Function to make all reactions in stoichiometric matrix irreversible, and 
 optionally prune inactive reactions from a solution and only give the 
 forward reaction of irreversible reactions in the solution.
@@ -19,6 +21,8 @@ function make_all_irreversible(S::Matrix{Float64},reversible::Vector{Int64})
 end
 
 """ 
+$(TYPEDSIGNATURES)
+
 Return the EFMs in terms of the original stoichiometric matrix, with reversible reactions.
 """
 function reversible_EFMs(E::Matrix{Float64},reversible::Vector{Int64})
@@ -34,6 +38,8 @@ function reversible_EFMs(E::Matrix{Float64},reversible::Vector{Int64})
 end
 
 """
+$(TYPEDSIGNATURES)
+
 Function to make a convex polyhedron out of a problem with fixed fluxes.
 Input:
     S: irreversible stoichiometric matrix, aka any reversible reactions have 
@@ -56,6 +62,8 @@ function fix_fluxes(S::Matrix{Float64},fixed_fluxes::Vector{Int64},flux_values::
 end
 
 """
+$(TYPEDSIGNATURES)
+
 Input: 
     E: matrix of EFMs that has come from DDStandard(S_convex)
     fixed_fluxes: same vector of indices of fixed fluxes from the input of fix_fluxes 
@@ -73,7 +81,11 @@ function clean_DD_result(E::Matrix{Float64},fixed_fluxes::Vector{Int64},flux_val
     return E[1:end-1,:]*rescale_value
 end
 
+"""
+$(TYPEDSIGNATURES)
 
+Helper function to calculate a nullspace of the matrix A, with all rational entries.
+"""
 function rational_nullspace(A::Matrix; tol=norm(A,Inf)*eps(Float64))
     m,n = size(A)
     R, pivotrows = rref_with_pivots(A)
@@ -99,12 +111,16 @@ function rational_nullspace(A::Matrix; tol=norm(A,Inf)*eps(Float64))
     return Z, pivotrows
 end
 
+"""
+$(TYPEDSIGNATURES)
 
-function remove_linearly_dep_rows(A)
+Helper function to remove linearly dependent rows of the matrix A.
+"""
+function remove_linearly_dep_rows(A::Matrix{Float64};tol=1e-15)
     rA = rref!(copy(Array(A)))
     idxs = Int[]
     for (i,row) in enumerate(eachrow(rA))
-        if !all(abs.(row) .<= 1e-6) # remove rows of all zero
+        if !all(abs.(row) .<= tol) # remove rows of all zero
             push!(idxs, i)
         end
     end
@@ -113,8 +129,10 @@ end
 
 
 """
+$(TYPEDSIGNATURES)
+
 Helper function to reorder the rows of the nullspace so that it is in the form 
-[I; K]. If rational==true, the input matrix and output are rational.
+[I; K]. 
 """
 function reorder_ns(A::Matrix)
     perm_vec = Int64[]

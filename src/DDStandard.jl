@@ -1,4 +1,6 @@
 """
+$(TYPEDSIGNATURES)
+
 Function to implement the standard DD algorithm, as described in Terzer 2009 thesis, to find 
 extreme rays of a polyhedral cone Ρ = {x ∈ ℜ^d | Ax = 0, x >= 0}. 
 Input
@@ -52,6 +54,8 @@ end
 
 
 """ 
+$(TYPEDSIGNATURES)
+
 Check if two extreme rays r1 and r2 are adjacent in A, using the rank adjacency test from Algorithms in Bioinformatics, p335, Terzer, Stelling, 2006
 """
 function rank_adjacency_test(r1::Union{Vector{Float64},Vector{Int64}},r2::Union{Vector{Float64},Vector{Int64}},A::Union{Matrix{Float64},Matrix{Int64}})

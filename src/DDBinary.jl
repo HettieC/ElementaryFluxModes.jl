@@ -3,49 +3,48 @@ $(TYPEDSIGNATURES)
 
 Calculate elementary flux modes for a pruned model.
 """
-function get_efms(pruned_model::StandardModel,biomass_id,atpm_id,flux_solution)
-
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Return a bitmap of the input vector, where entries are 1 if the vector entry is 
-greater than zero, and zero if the entries are zero. 
-Return an error if any entries of the vector are less than zero.
-"""
-function make_bitmap(row)
-    bitmap = Bool[]
-    for x in row
-        if x > 0
-            push!(bitmap,true)
-        elseif x == 0 
-            push!(bitmap,false)
-        else 
-            throw(DomainError(x, "argument for `make_bitmap` must be nonnegative"))
+function get_efms(N::Matrix{Float64}; tol=1e-15)
+    N = remove_linearly_dep_rows(N)[1]
+    K = rational_nullspace(N; tol)[1]
+    for (i,x) in enumerate(K) 
+        if abs(x) < tol
+            K[i] = 0
         end
     end
-    return 1*bitmap 
-end
+    R = DDBinary(N,K)
 
+    # for each column r of R, find non-zero elements and solve N_.non_zero*r = 0 
+    # calculate a nullspace for the columns of N corresponding to non-zero elements of column 
+    E = Matrix(undef,size(R,1),size(R,2))
+    for (i,r) in enumerate(eachcol(R))
+        non_zero = findall(x->x!=0,r)
+        flux_ns = rational_nullspace(N[:,non_zero];tol=1e-14)[1]
+        mode = zeros(size(R,1))
+        for (j,x) in zip(non_zero,flux_ns)
+            mode[j] = abs(x) < 1e-14 ? 0 : x
+        end
+        E[:,i] = mode
+    end
+    return E[1:end-1]
+end
 
 """ 
 $(TYPEDSIGNATURES)
 
 Implement the Double Description method in binary form.
 The input variables are:
--N: stoichiometric matrix, where all reaction directions have already been fixed so that reactions are in the forward direction
+-N: stoichiometric matrix, where all reaction directions have already been fixed 
+    so that reactions are in the forward direction
 -K: initial nullspace of N, in the form [I;K*] 
 Output:
 -R: binary elementary flux modes 
 """
 function DDBinary(N,K)
-    R_binary = Matrix(1*I(size(K,2)))
+    R_binary = Matrix(I(size(K,2)))
     already_pos = size(K,2)
     R_remaining = K[size(R_binary,1)+1:end,:]
     R = copy(K)
-    for k in 1:size(N,2) # iterate through every reaction and ensure that the EFMs are non-negative
-        k <= already_pos && continue
+    for k in already_pos+1:size(N,2) # iterate through every reaction and ensure that the EFMs are non-negative
         if all(x->x>=0,R[k,:]) ## non-negativity already satisfied
             R_binary = vcat(R_binary,make_bitmap(R[k,:])')
             R_remaining = R_remaining[2:end,:]
@@ -75,10 +74,63 @@ function DDBinary(N,K)
             R_binary = reduce(hcat,(make_bitmap.(eachcol(R[1:k,:])))) #binarise the 1:k rows of R
             R_remaining = R[k+1:end,:]
             R = vcat(R_binary,R_remaining) #Q: better to keep separate? better to never separate?
+            #println("k: $k \n size(R): $(size(R)) \n \n")
         end
     end
     return R 
 end
+
+"""
+$(TYPEDSIGNATURES)
+
+Helper function to calculate a nullspace of the matrix A, with all rational entries.
+"""
+function rational_nullspace(A::Matrix; tol=norm(A,Inf)*eps(Float64))
+    m,n = size(A)
+    R, pivotrows = rref_with_pivots(A)
+    r = length(pivotrows)
+    nopiv = collect(1:n) 
+    nopiv = [x for x in nopiv if x ∉ pivotrows]
+    Z = zeros(n, n-r)
+
+    if n > r 
+        for (j,k) in enumerate(nopiv) 
+            Z[k,:] .= I(n-r)[j,:]
+        end
+        if r > 0 
+            Z[pivotrows,:] = -R[1:r, nopiv]
+        end
+    end
+
+    for (i,x) in enumerate(R) 
+        if abs(x) < tol
+            R[i] = 0
+        end
+    end
+    return Z, pivotrows
+end
+
+"""
+$(TYPEDSIGNATURES)
+
+Return a bitmap of the input vector, where entries are 1 if the vector entry is 
+greater than zero, and zero if the entries are zero. 
+Return an error if any entries of the vector are less than zero.
+"""
+function make_bitmap(row)
+    bitmap = Bool[]
+    for x in row
+        if x > 0
+            push!(bitmap,true)
+        elseif x == 0 
+            push!(bitmap,false)
+        else 
+            throw(DomainError(x, "argument for `make_bitmap` must be nonnegative"))
+        end
+    end
+    return bitmap 
+end
+
 
 """
 $(TYPEDSIGNATURES)

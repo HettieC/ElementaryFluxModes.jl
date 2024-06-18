@@ -12,7 +12,7 @@ Output:
         into two irreversible reactions 
 """ 
 
-function make_all_irreversible(S::Matrix{Float64},reversible::Vector{Int64})
+function make_all_irreversible(S::Matrix,reversible::Vector{Int64})
     S_irrev = copy(S)
     for j in reversible
         S_irrev = hcat(S_irrev,-S[:,j]) # add new reversed reactions on right hand side
@@ -61,55 +61,6 @@ function fix_fluxes(S::Matrix{Float64},fixed_fluxes::Vector{Int64},flux_values::
     return hcat(N1,w)
 end
 
-"""
-$(TYPEDSIGNATURES)
-
-Input: 
-    E: matrix of EFMs that has come from DDStandard(S_convex)
-    fixed_fluxes: same vector of indices of fixed fluxes from the input of fix_fluxes 
-Output:
-    E_cleaned: 
-"""
-function clean_DD_result(E::Matrix{Float64},fixed_fluxes::Vector{Int64},flux_values::Vector{Float64})
-    # last row of E corresponds to the fixed fluxes 
-    fixed_row = E[end,:]
-    #E = [[1:end-1],:]
-    for (r,v) in zip(fixed_fluxes,flux_values)
-        E = [E[1:r-1,:] ; v*fixed_row'; E[r:end,:]]
-    end
-    rescale_value = flux_values[1] / E[fixed_fluxes[1],findfirst(x->x!=0,E[fixed_fluxes[1]])]
-    return E[1:end-1,:]*rescale_value
-end
-
-"""
-$(TYPEDSIGNATURES)
-
-Helper function to calculate a nullspace of the matrix A, with all rational entries.
-"""
-function rational_nullspace(A::Matrix; tol=norm(A,Inf)*eps(Float64))
-    m,n = size(A)
-    R, pivotrows = rref_with_pivots(A)
-    r = length(pivotrows)
-    nopiv = collect(1:n) 
-    nopiv = [x for x in nopiv if x ∉ pivotrows]
-    Z = zeros(n, n-r)
-
-    if n > r 
-        for (j,k) in enumerate(nopiv) 
-            Z[k,:] .= I(n-r)[j,:]
-        end
-        if r > 0 
-            Z[pivotrows,:] = -R[1:r, nopiv]
-        end
-    end
-
-    for (i,x) in enumerate(R) 
-        if abs(x) < tol
-            R[i] = 0
-        end
-    end
-    return Z, pivotrows
-end
 
 """
 $(TYPEDSIGNATURES)
@@ -135,16 +86,16 @@ Helper function to reorder the rows of the nullspace so that it is in the form
 [I; K]. 
 """
 function reorder_ns(A::Matrix)
+    j = 1
     perm_vec = Int64[]
-    for (i,row) in enumerate(eachrow(A))
-        if length(perm_vec) == size(A,2)
-            append!(perm_vec,[i for i in 1:size(A,1) if i ∉ perm_vec])
-            break
-        else
-            if row == Matrix(1.0I, size(A,2), size(A,2))[length(perm_vec)+1,:]
-                push!(perm_vec,i)
-            end
+    for (i,row) in enumerate(eachrow(K))
+        j > size(K,2) && break
+        if row == Array(Float64.(I(size(K,2))))[j,:]
+            push!(perm_vec,i)
+            j += 1
         end
     end
+    append!(perm_vec,[i for i in 1:size(K,1) if i ∉ perm_vec])
+    
     return A[perm_vec,:], perm_vec
 end

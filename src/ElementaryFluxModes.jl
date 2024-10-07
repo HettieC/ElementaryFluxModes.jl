@@ -3,7 +3,7 @@ module ElementaryFluxModes
 using LinearAlgebra, RowEchelon
 using DocStringExtensions
 
-include("utils.jl") 
+include("utils.jl")
 export reorder_ns
 export rational_nullspace
 export make_all_irreversible

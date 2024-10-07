@@ -92,14 +92,14 @@ Helper function to reorder the rows of the nullspace so that it is in the form
 function reorder_ns(A::Matrix)
     j = 1
     perm_vec = Int64[]
-    for (i, row) in enumerate(eachrow(K))
-        j > size(K, 2) && break
-        if row == Array(Float64.(I(size(K, 2))))[j, :]
+    for (i, row) in enumerate(eachrow(A))
+        j > size(A, 2) && break
+        if row == Array(Float64.(I(size(A, 2))))[j, :]
             push!(perm_vec, i)
             j += 1
         end
     end
-    append!(perm_vec, [i for i = 1:size(K, 1) if i ∉ perm_vec])
+    append!(perm_vec, [i for i = 1:size(A, 1) if i ∉ perm_vec])
 
     return A[perm_vec, :], perm_vec
 end

@@ -39,20 +39,20 @@ The input variables are:
 Output:
 -R: binary elementary flux modes 
 """
-function DDBinary(N,K)
+function DDBinary(N,K) # could take in just K
     R_binary = Matrix(I(size(K,2)))
     already_pos = size(K,2)
     R_remaining = K[size(R_binary,1)+1:end,:]
     R = copy(K)
     for k in already_pos+1:size(N,2) # iterate through every reaction and ensure that the EFMs are non-negative
-        if all(x->x>=0,R[k,:]) ## non-negativity already satisfied
+        if all(x->x>=0,R[k,:]) ## non-negativity of all entries in row already satisfied
             R_binary = vcat(R_binary,make_bitmap(R[k,:])')
             R_remaining = R_remaining[2:end,:]
             R = vcat(R_binary,R_remaining)
         else ## remove negative columns and create new rays from
              ## adjacent negative and positive rays
-            tau_neg = [i for (i,x) in enumerate(R[k,:]) if x<0]
-            tau_pos = [i for (i,x) in enumerate(R[k,:]) if x>0]
+            tau_neg = [i for (i,x) in enumerate(R[k,:]) if x<0 && !isapprox(x,0)] # float errors possible
+            tau_pos = [i for (i,x) in enumerate(R[k,:]) if x>0 && !isapprox(x,0)] # float errors possible
             R = vcat(R_binary,R_remaining)
             if size(R,2) <= 3 # if only two or three rays they must all be adjacent
                 adj = [(i,j) for i in tau_pos for j in tau_neg]
@@ -67,14 +67,13 @@ function DDBinary(N,K)
                 new_cols = hcat(
                     new_cols, 
                     (p[k])*q - (q[k])*p
-                )
-            end #Q: is list/matrix comprehension faster? 
+                ) # float errors possible, have to multiply then subtract possibly small floats
+            end 
             R = R[:,setdiff(1:size(R,2),tau_neg)] # remove negative columns
             R = hcat(R,new_cols) # add the new columns
             R_binary = reduce(hcat,(make_bitmap.(eachcol(R[1:k,:])))) #binarise the 1:k rows of R
             R_remaining = R[k+1:end,:]
-            R = vcat(R_binary,R_remaining) #Q: better to keep separate? better to never separate?
-            #println("k: $k \n size(R): $(size(R)) \n \n")
+            R = vcat(R_binary,R_remaining)
         end
     end
     return R 
@@ -151,6 +150,7 @@ function check_adjacency(i,j,R)
     z2 = zero_set(R[:,j])
     z = intersect(z1,z2)
     adj = true
+    # maybe any(col -> issubset(z,zero_set(col)),R[:,1:end .∉ [[i,j]]]) faster? check
     for col in eachcol(R[:,1:end .∉ [[i,j]]])
         if issubset(z,zero_set(col))
             adj = false

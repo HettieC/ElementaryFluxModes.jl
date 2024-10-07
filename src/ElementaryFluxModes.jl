@@ -1,3 +1,8 @@
+"""
+Package `ElementaryFluxModes` provides a Julia implementation of the Double Description 
+method to calculate extreme rays of convex polyhedral cones. We follow the 
+method described in Terzer 2009 thesis for the polyhedral cone Ρ = {x ∈ ℜ^d | Ax = 0, x >= 0}.
+"""
 module ElementaryFluxModes
 
 using LinearAlgebra, RowEchelon

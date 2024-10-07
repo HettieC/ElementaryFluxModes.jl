@@ -1,16 +1,16 @@
 """
 $(TYPEDSIGNATURES)
 
-Function to implement the standard DD algorithm, as described in Terzer 2009 thesis, to find 
-extreme rays of a polyhedral cone Ρ = {x ∈ ℜ^d | Ax = 0, x >= 0}. 
+Function to implement the standard DD algorithm, as described in Terzer 2009 thesis, to find
+extreme rays of a polyhedral cone Ρ = {x ∈ ℜ^d | Ax = 0, x >= 0}.
 Input
-    A: the stoichiometric matrix with only forward reactions. If any fluxes are fixed 
+    A: the stoichiometric matrix with only forward reactions. If any fluxes are fixed
         then A has the form [N1 w] where N1 is the stoichiometric matrix for non-fixed fluxes,
         and w is the columns of fixed fluxes multiplied by their flux values.
     Output
-    R: an n x K matrix containing K EFMs, fixed fluxes need to be put into the correct 
+    R: an n x K matrix containing K EFMs, fixed fluxes need to be put into the correct
         position in postprocessing.
-    row_order: permutation vector of the rows of the nullspace, matching reactions names to 
+    row_order: permutation vector of the rows of the nullspace, matching reactions names to
         fluxes needs to be done using this row_order
 """
 function DDStandard(A::Matrix)
@@ -25,7 +25,7 @@ function DDStandard(A::Matrix)
     R = Matrix(nsrref')
     R, row_order = reorder_ns(R) # put I matrix at start of R
     d, n = size(R)
-    for j = n+1:d # first n rows of R are guaranteed >=0 from reordering 
+    for j = n+1:d # first n rows of R are guaranteed >=0 from reordering
         d, n = size(R)
         tau_pos = [i for i = 1:n if R[j, i] > 0]
         # can be sped up if all cols are pos or zero
@@ -56,7 +56,7 @@ function DDStandard(A::Matrix)
 end
 
 
-""" 
+"""
 $(TYPEDSIGNATURES)
 
 Check if two extreme rays r1 and r2 are adjacent in A, using the rank adjacency test from Algorithms in Bioinformatics, p335, Terzer, Stelling, 2006

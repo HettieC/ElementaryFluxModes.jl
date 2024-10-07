@@ -13,8 +13,8 @@ function get_efms(N::Matrix{Float64}; tol = 1e-15)
     end
     R = DDBinary(N, K)
 
-    # for each column r of R, find non-zero elements and solve N_.non_zero*r = 0 
-    # calculate a nullspace for the columns of N corresponding to non-zero elements of column 
+    # for each column r of R, find non-zero elements and solve N_.non_zero*r = 0
+    # calculate a nullspace for the columns of N corresponding to non-zero elements of column
     E = Matrix(undef, size(R, 1), size(R, 2))
     for (i, r) in enumerate(eachcol(R))
         non_zero = findall(x -> x != 0, r)
@@ -28,18 +28,18 @@ function get_efms(N::Matrix{Float64}; tol = 1e-15)
     return E[1:end-1]
 end
 
-""" 
+"""
 $(TYPEDSIGNATURES)
 
 Implement the Double Description method in binary form.
 The input variables are:
--N: the stoichiometric matrix with only forward reactions. If any fluxes are fixed 
+-N: the stoichiometric matrix with only forward reactions. If any fluxes are fixed
     then N has the form [N1 w] where N1 is the stoichiometric matrix for non-fixed fluxes,
     and w is the columns of fixed fluxes multiplied by their flux values.
 
--K: initial nullspace of N, in the form [I;K*] 
+-K: initial nullspace of N, in the form [I;K*]
 Output:
--R: binary elementary flux modes 
+-R: binary elementary flux modes
 """
 function DDBinary(N, K)
     R_binary = Matrix(I(size(K, 2)))
@@ -67,7 +67,7 @@ function DDBinary(N, K)
                 p = copy(R[:, i])
                 q = copy(R[:, j])
                 new_cols = hcat(new_cols, (p[k]) * q - (q[k]) * p)
-            end #Q: is list/matrix comprehension faster? 
+            end #Q: is list/matrix comprehension faster?
             R = R[:, setdiff(1:size(R, 2), tau_neg)] # remove negative columns
             R = hcat(R, new_cols) # add the new columns
             R_binary = reduce(hcat, (make_bitmap.(eachcol(R[1:k, :])))) #binarise the 1:k rows of R
@@ -112,8 +112,8 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Return a bitmap of the input vector, where entries are 1 if the vector entry is 
-greater than zero, and zero if the entries are zero. 
+Return a bitmap of the input vector, where entries are 1 if the vector entry is
+greater than zero, and zero if the entries are zero.
 Return an error if any entries of the vector are less than zero.
 """
 function make_bitmap(row)
@@ -141,8 +141,8 @@ zero_set(vec) = [i for (i, x) in enumerate(vec) if x == 0]
 """
 $(TYPEDSIGNATURES)
 
-Check adjacency of columns i and j in r by making sure that there exists no other 
-extreme ray in R whose zero set is a superset of the intersection of the zero sets 
+Check adjacency of columns i and j in r by making sure that there exists no other
+extreme ray in R whose zero set is a superset of the intersection of the zero sets
 of ray i and ray j.
 """
 function check_adjacency(i, j, R)

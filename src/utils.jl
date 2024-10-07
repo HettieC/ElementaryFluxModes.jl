@@ -1,15 +1,15 @@
 """
 $(TYPEDSIGNATURES)
 
-Function to make all reactions in stoichiometric matrix irreversible, and 
-optionally prune inactive reactions from a solution and only give the 
+Function to make all reactions in stoichiometric matrix irreversible, and
+optionally prune inactive reactions from a solution and only give the
 forward reaction of irreversible reactions in the solution.
-Input: 
-    S: stoichiometric matrix 
+Input:
+    S: stoichiometric matrix
     reversible: list of reversible reaction indices
 Output:
-    S_irrev: stoichiometric matrix with reversible reactions split 
-        into two irreversible reactions 
+    S_irrev: stoichiometric matrix with reversible reactions split
+        into two irreversible reactions
 """
 
 function make_all_irreversible(S::Matrix, reversible::Vector{Int64})
@@ -20,7 +20,7 @@ function make_all_irreversible(S::Matrix, reversible::Vector{Int64})
     return S_irrev
 end
 
-""" 
+"""
 $(TYPEDSIGNATURES)
 
 Return the EFMs in terms of the original stoichiometric matrix, with reversible reactions.
@@ -42,11 +42,11 @@ $(TYPEDSIGNATURES)
 
 Function to make a convex polyhedron out of a problem with fixed fluxes.
 Input:
-    S: irreversible stoichiometric matrix, aka any reversible reactions have 
-        been split into two irreversible reactions 
+    S: irreversible stoichiometric matrix, aka any reversible reactions have
+        been split into two irreversible reactions
     fixed_fluxes: list of indices of the fixed fluxes
     flux_values: list of fixed flux values in same order as fixed_fluxes
-Output: 
+Output:
     S_convex: stoichiometric matrix with which to implement the DD algorithm
 Note: results of DDStandard need to be transformed to take into account these
     fixed fluxes, using clean_DD_result
@@ -86,8 +86,8 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Helper function to reorder the rows of the nullspace so that it is in the form 
-[I; K]. 
+Helper function to reorder the rows of the nullspace so that it is in the form
+[I; K].
 """
 function reorder_ns(A::Matrix)
     j = 1

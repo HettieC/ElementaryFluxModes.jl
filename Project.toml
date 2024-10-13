@@ -23,6 +23,7 @@ TerminalPager = "0c614874-6106-40ed-a7c2-2f1cd0bff883"
 Tulip = "6dd1b50a-3aae-11e9-10b5-ef983d2400fa"
 
 [compat]
+Revise = "3"
 julia = "1.9"
 
 [extras]

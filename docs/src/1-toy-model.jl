@@ -29,6 +29,7 @@ K = round.(K, digits=14)
 order = Int64[]
 rows_done = 1
 for (i, row) in enumerate(eachrow(K))
+    global rows_done
     rows_done > size(K, 2) && break
     if row == Matrix(I(size(K, 2)))[rows_done, :]
         push!(order, i)

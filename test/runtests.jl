@@ -8,7 +8,7 @@ using Test
     @testset "Binary implementation of double dispatch EFMs" begin
         include("ddbinary.jl")
     end
-    @testset "Quickstart" begin
-        include("../docs/src/0-quickstart.jl")
+    @testset "Toy model" begin
+        include("../docs/src/1-toy-model.jl")
     end
 end

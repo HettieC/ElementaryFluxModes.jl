@@ -21,7 +21,7 @@ N = AbstractFBCModels.stoichiometry(model)
 # Take a rational nullspace of `N`
 
 K = rational_nullspace(Matrix(N))[1]
-K = round.(K, digits=14)
+K = round.(K, digits = 14)
 # Permute the rows of K, so that it is in the form [I;K*]
 
 order = Int64[]
@@ -34,7 +34,7 @@ for (i, row) in enumerate(eachrow(K))
         rows_done += 1
     end
 end
-append!(order, [i for i in 1:size(K, 1) if i ∉ order])
+append!(order, [i for i = 1:size(K, 1) if i ∉ order])
 K = K[order, :]
 
 # N also needs to be in same reaction order as K
@@ -51,7 +51,7 @@ R = DDBinary(N, K)
 E = Matrix(undef, size(R, 1), size(R, 2))
 for (i, r) in enumerate(eachcol(R))
     non_zero = findall(x -> x != 0, r)
-    flux_ns = rational_nullspace(Matrix(N[:, non_zero]); tol=1e-14)[1]
+    flux_ns = rational_nullspace(Matrix(N[:, non_zero]); tol = 1e-14)[1]
     mode = zeros(size(R, 1))
     for (j, x) in zip(non_zero, flux_ns)
         mode[j] = abs(x) < 1e-14 ? 0 : x

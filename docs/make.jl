@@ -1,4 +1,3 @@
-
 using Documenter, Literate, ElementaryFluxModes
 
 examples =

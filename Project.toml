@@ -1,35 +1,20 @@
 name = "ElementaryFluxModes"
 uuid = "89210afb-bb0f-413a-8ffa-8390a41acbf2"
 authors = ["HettieC <hester.chapman@btinternet.com> and contributors"]
-version = "1.0.0-DEV"
+version = "0.1.0"
 
 [deps]
-AbstractFBCModels = "5a4f3dfa-1789-40f8-8221-69268c29937c"
-BenchmarkTools = "6e4b80f9-dd63-53aa-95a3-0cdb28fa8baf"
-COBREXA = "babc4406-5200-4a30-9033-bf5ae714c842"
-Clarabel = "61c947e1-3e6d-4ee4-985a-eec8c727bd6e"
-DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
-HiGHS = "87dc4568-4c63-4d18-b0c0-bb2238e4078b"
-JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
-NPZ = "15e1cf62-19b3-5cfa-8e77-841668bca605"
-Nemo = "2edaba10-b0f1-5616-af89-8c11ac63239a"
-Permutations = "2ae35dd2-176d-5d53-8349-f30d82d94d4f"
-Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"
-Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 RowEchelon = "af85af4c-bcd5-5d23-b03a-a909639aa875"
-SparseArrays = "2f01184e-e22b-5df5-ae63-d93ebab69eaf"
-TerminalPager = "0c614874-6106-40ed-a7c2-2f1cd0bff883"
-Tulip = "6dd1b50a-3aae-11e9-10b5-ef983d2400fa"
 
 [compat]
 AbstractFBCModels = "1.2.0"
-HiGHS = "1.12.2"
 julia = "1.9"
 
 [extras]
+AbstractFBCModels = "5a4f3dfa-1789-40f8-8221-69268c29937c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["Test"]
+test = ["AbstractFBCModels", "Test"]

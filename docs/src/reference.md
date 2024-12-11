@@ -1,11 +1,6 @@
 
 # Reference
 
-```@autodocs
-Modules = [ElementaryFluxModes]
-Pages = ["src/ElementaryFluxModes.jl"]
-```
-
 ## Standard DD
 
 ```@autodocs

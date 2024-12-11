@@ -45,7 +45,7 @@ N = N[:, order]
 
 R = DDBinary(N, K)
 
-# DDBinary returns a boolean matrix, flux values for 
+# DDBinary returns a boolean matrix, flux values for
 # each EFM then need to be calculated in E:
 
 E = Matrix(undef, size(R, 1), size(R, 2))

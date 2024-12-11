@@ -7,11 +7,10 @@ using LinearAlgebra
 # ## Load a simple model
 
 # The code used to construct the model is located in `test/simple_model.jl`, but
-# it is not shown here for brevity. Below is a visualization of the model.
+# it is not shown here for brevity.
 
 include("../../test/simple_model.jl"); #hide
 
-# ![simple_model](./assets/simple_model.svg) 
 
 model
 

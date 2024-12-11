@@ -72,7 +72,7 @@ function DDBinary(N, K)
             R = hcat(R, new_cols) # add the new columns
             R_binary = reduce(hcat, (make_bitmap.(eachcol(R[1:k, :])))) #binarise the 1:k rows of R
             R_remaining = R[k+1:end, :]
-#           R_remaining = R[k+1:end, :]./maximum(abs.(R[k+1,:]))
+            #           R_remaining = R[k+1:end, :]./maximum(abs.(R[k+1,:]))
             R = vcat(R_binary, R_remaining) #Q: better to keep separate? better to never separate?
             #println("k: $k \n size(R): $(size(R)) \n \n")
         end

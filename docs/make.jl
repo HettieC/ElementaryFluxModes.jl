@@ -19,7 +19,7 @@ withenv("COLUMNS" => 150) do
         clean = false,
         format = Documenter.HTML(
             ansicolor = true,
-            canonical = "https://hettiec.github.io/ElementaryFluxModes.jl/stable/",
+            canonical = "https://hettiec.github.io/ElementaryFluxModes.jl",
         ),
         sitename = "ElementaryFluxModes.jl",
         linkcheck = false,

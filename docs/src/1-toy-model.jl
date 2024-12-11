@@ -1,4 +1,4 @@
-# # Quick start
+# # Toy Model
 
 using ElementaryFluxModes
 

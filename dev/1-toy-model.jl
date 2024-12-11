@@ -14,6 +14,8 @@ include("../../test/simple_model.jl"); #hide
 
 model
 
+# ## Prepare matrices for calculating EFMs
+
 # Get the stoichiometric matrix of the model, this is what we use to find EFMs
 
 N = AbstractFBCModels.stoichiometry(model)
@@ -40,6 +42,8 @@ K = K[order, :]
 # N also needs to be in same reaction order as K
 
 N = N[:, order]
+
+# ## Calculate the EFMs 
 
 # Run the double description algorith on `N` and `K`
 

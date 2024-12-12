@@ -1,16 +1,30 @@
 """
 $(TYPEDSIGNATURES)
 
-Calculate elementary flux modes for a pruned model.
+Calculate elementary flux modes of a stoichiometric matrix.
 """
 function get_efms(N::Matrix{Float64}; tol = 1e-15)
+    println("hello")
     N = remove_linearly_dep_rows(N)[1]
-    K = rational_nullspace(N; tol)[1]
-    for (i, x) in enumerate(K)
-        if abs(x) < tol
-            K[i] = 0
+    K = rational_nullspace(Matrix(N))[1]
+    # Permute the rows of `K` to be in the form `[I;K*]`
+    order = Int64[]
+    rows_done = 1
+    for (i, row) in enumerate(eachrow(K))
+        rows_done > size(K, 2) && break
+        if row == Matrix(I(size(K, 2)))[rows_done, :]
+            push!(order, i)
+            rows_done += 1
         end
     end
+    append!(order, [i for i = 1:size(K, 1) if i ∉ order])
+    K = K[order, :]
+    
+    # The reaction order of `N` must match that of `K`
+    N = N[:, order]
+    
+    # Run the double description algorithm 
+    
     R = DDBinary(N, K)
 
     # for each column r of R, find non-zero elements and solve N_.non_zero*r = 0
@@ -18,14 +32,16 @@ function get_efms(N::Matrix{Float64}; tol = 1e-15)
     E = Matrix(undef, size(R, 1), size(R, 2))
     for (i, r) in enumerate(eachcol(R))
         non_zero = findall(x -> x != 0, r)
-        flux_ns = rational_nullspace(N[:, non_zero]; tol = 1e-14)[1]
+        flux_ns = rational_nullspace(N[:, non_zero]; tol=1e-14)[1]
         mode = zeros(size(R, 1))
         for (j, x) in zip(non_zero, flux_ns)
             mode[j] = abs(x) < 1e-14 ? 0 : x
         end
         E[:, i] = mode
     end
-    return E[1:end-1]
+    # now put back into original order
+    E = E[invperm(order), :]
+    return E ./ E[end]
 end
 
 """

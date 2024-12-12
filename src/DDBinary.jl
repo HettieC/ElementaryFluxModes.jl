@@ -4,7 +4,6 @@ $(TYPEDSIGNATURES)
 Calculate elementary flux modes of a stoichiometric matrix.
 """
 function get_efms(N::Matrix{Float64}; tol = 1e-15)
-    println("hello")
     N = remove_linearly_dep_rows(N)[1]
     K = rational_nullspace(Matrix(N))[1]
     # Permute the rows of `K` to be in the form `[I;K*]`

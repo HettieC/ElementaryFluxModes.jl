@@ -2,6 +2,10 @@
 $(TYPEDSIGNATURES)
 
 Calculate elementary flux modes of a stoichiometric matrix.
+Input `N` must be the stoichiometric matrix of a network with only 
+forward reactions.
+Output: vector of size (n,k) of the fluxes through the n reactions 
+in the k EFMs.
 """
 function get_efms(N::Matrix{Float64}; tol = 1e-15)
     N = remove_linearly_dep_rows(N)[1]

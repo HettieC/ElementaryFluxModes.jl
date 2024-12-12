@@ -15,7 +15,6 @@ export make_all_irreversible
 
 include("DDBinary.jl")
 export DDBinary
-export make_bitmap
-export check_adjacency
+export get_efms
 
 end

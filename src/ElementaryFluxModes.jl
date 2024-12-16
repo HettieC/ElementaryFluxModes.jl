@@ -16,5 +16,6 @@ export make_all_irreversible
 include("DDBinary.jl")
 export DDBinary
 export get_efms
+export get_ofms
 
 end

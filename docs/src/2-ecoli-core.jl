@@ -275,6 +275,7 @@ f, a, hm = heatmap(
     scaled_sens[:,sens_perm]';
     axis = (
         yticks = (1:2, ["Respiratory","Fermentative"]),
+        yticklabelrotation = pi / 2,
         xticklabelrotation = pi / 2,
         xlabel = "Parameters",
         ylabel = "Control coefficient, p/λ * ∂λ/∂p",

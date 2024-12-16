@@ -7,7 +7,7 @@ forward reactions.
 Output: vector of size (n,k) of the fluxes through the n reactions 
 in the k EFMs.
 """
-function get_efms(N::Matrix{Float64}; tol = 1e-15)
+function get_efms(N::Matrix{Float64}; tol=1e-15)
     N = remove_linearly_dep_rows(N)[1]
     K = rational_nullspace(Matrix(N))[1]
     # Permute the rows of `K` to be in the form `[I;K*]`
@@ -22,12 +22,12 @@ function get_efms(N::Matrix{Float64}; tol = 1e-15)
     end
     append!(order, [i for i = 1:size(K, 1) if i ∉ order])
     K = K[order, :]
-    
+
     # The reaction order of `N` must match that of `K`
     N = N[:, order]
-    
+
     # Run the double description algorithm 
-    
+
     R = DDBinary(N, K)
 
     # for each column r of R, find non-zero elements and solve N_.non_zero*r = 0
@@ -45,6 +45,74 @@ function get_efms(N::Matrix{Float64}; tol = 1e-15)
     # now put back into original order
     E = E[invperm(order), :]
     return E ./ E[end]
+end
+
+"""
+$(TYPEDSIGNATURES)
+Calculate the optimal flux modes of a pruned optimal solution.
+TODO: make work for more than two fixed fluxes
+"""
+
+function get_ofms(N::Matrix{Float64}, fixed_fluxes::Vector{Int}, flux_values::Vector{Float64})
+    if length(fixed_fluxes) != length(flux_values)
+        error("Length of fixed fluxes ($(length(fixed_fluxes)) does not match length of flux values ($(length(flux_values)))" )
+    elseif length(fixed_fluxes) > 2 
+        error("Please follow steps manually to put the fluxes in the right order.")
+    end
+    fixed_order = sortperm(fixed_fluxes)
+    fixed_fluxes = fixed_fluxes[fixed_order]
+    flux_values = flux_values[fixed_order]
+    N = remove_linearly_dep_rows(N)[1]
+    N1 = N[:, setdiff(1:size(N, 2), fixed_fluxes)]
+    N2 = N[:, fixed_fluxes]
+    w = N2 * flux_values
+    N = Matrix(hcat(N1, w))
+
+    K = rational_nullspace(Matrix(N))[1]
+    # Permute the rows of `K` to be in the form `[I;K*]`
+    order = Int64[]
+    rows_done = 1
+    for (i, row) in enumerate(eachrow(K))
+        rows_done > size(K, 2) && break
+        if row == Matrix(I(size(K, 2)))[rows_done, :]
+            push!(order, i)
+            rows_done += 1
+        end
+    end
+    append!(order, [i for i = 1:size(K, 1) if i ∉ order])
+    K = K[order, :]
+
+    # The reaction order of `N` must match that of `K`
+    N = N[:, order]
+
+    # Run the double description algorithm 
+
+    R = DDBinary(N, K)
+
+    # for each column r of R, find non-zero elements and solve N_.non_zero*r = 0
+    # calculate a nullspace for the columns of N corresponding to non-zero elements of column
+    E = Matrix(undef, size(R, 1), size(R, 2))
+    for (i, r) in enumerate(eachcol(R))
+        non_zero = findall(x -> x != 0, r)
+        flux_ns = rational_nullspace(N[:, non_zero]; tol=1e-14)[1]
+        mode = zeros(size(R, 1))
+        for (j, x) in zip(non_zero, flux_ns)
+            mode[j] = abs(x) < 1e-14 ? 0 : x
+        end
+        E[:, i] = mode
+    end
+    # put back into original order 
+    E = E[invperm(order),:]
+    E = E ./ E[end]
+
+    # put the fixed fluxes back in the right order 
+    new_E = E[1:fixed_fluxes[1]-1, :]
+    new_E = vcat(new_E, E[end, :]' * flux_values[1])
+    new_E = vcat(new_E, E[fixed_fluxes[1]:fixed_fluxes[2]-2, :])
+    new_E = vcat(new_E, E[end, :]' * flux_values[2])
+    new_E = vcat(new_E, E[fixed_fluxes[2]-1:end-1, :])
+
+    return new_E
 end
 
 """
@@ -104,7 +172,7 @@ $(TYPEDSIGNATURES)
 
 Helper function to calculate a nullspace of the matrix A, with all rational entries.
 """
-function rational_nullspace(A::Matrix; tol = norm(A, Inf) * eps(Float64))
+function rational_nullspace(A::Matrix; tol=norm(A, Inf) * eps(Float64))
     m, n = size(A)
     R, pivotrows = rref_with_pivots(A)
     r = length(pivotrows)

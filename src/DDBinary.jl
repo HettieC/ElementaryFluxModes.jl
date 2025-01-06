@@ -7,7 +7,7 @@ forward reactions.
 Output: vector of size (n,k) of the fluxes through the n reactions 
 in the k EFMs.
 """
-function get_efms(N::Matrix{Float64}; tol=1e-15)
+function get_efms(N::Matrix{Float64}; tol = 1e-15)
     N = remove_linearly_dep_rows_qr(N)
     K = rational_nullspace(Matrix(N))[1]
     # Permute the rows of `K` to be in the form `[I;K*]`
@@ -35,7 +35,7 @@ function get_efms(N::Matrix{Float64}; tol=1e-15)
     E = Matrix(undef, size(R, 1), size(R, 2))
     for (i, r) in enumerate(eachcol(R))
         non_zero = findall(x -> x != 0, r)
-        flux_ns = rational_nullspace(N[:, non_zero]; tol=1e-14)[1]
+        flux_ns = rational_nullspace(N[:, non_zero]; tol = 1e-14)[1]
         mode = zeros(size(R, 1))
         for (j, x) in zip(non_zero, flux_ns)
             mode[j] = abs(x) < 1e-14 ? 0 : x
@@ -53,10 +53,16 @@ Calculate the optimal flux modes of a pruned optimal solution.
 TODO: make work for more than two fixed fluxes
 """
 
-function get_ofms(N::Matrix{Float64}, fixed_fluxes::Vector{Int}, flux_values::Vector{Float64})
+function get_ofms(
+    N::Matrix{Float64},
+    fixed_fluxes::Vector{Int},
+    flux_values::Vector{Float64},
+)
     if length(fixed_fluxes) != length(flux_values)
-        error("Length of fixed fluxes ($(length(fixed_fluxes)) does not match length of flux values ($(length(flux_values)))" )
-    elseif length(fixed_fluxes) > 2 
+        error(
+            "Length of fixed fluxes ($(length(fixed_fluxes)) does not match length of flux values ($(length(flux_values)))",
+        )
+    elseif length(fixed_fluxes) > 2
         error("Please follow steps manually to put the fluxes in the right order.")
     end
     fixed_order = sortperm(fixed_fluxes)
@@ -94,7 +100,7 @@ function get_ofms(N::Matrix{Float64}, fixed_fluxes::Vector{Int}, flux_values::Ve
     E = Matrix(undef, size(R, 1), size(R, 2))
     for (i, r) in enumerate(eachcol(R))
         non_zero = findall(x -> x != 0, r)
-        flux_ns = rational_nullspace(N[:, non_zero]; tol=1e-14)[1]
+        flux_ns = rational_nullspace(N[:, non_zero]; tol = 1e-14)[1]
         mode = zeros(size(R, 1))
         for (j, x) in zip(non_zero, flux_ns)
             mode[j] = abs(x) < 1e-14 ? 0 : x
@@ -102,7 +108,7 @@ function get_ofms(N::Matrix{Float64}, fixed_fluxes::Vector{Int}, flux_values::Ve
         E[:, i] = mode
     end
     # put back into original order 
-    E = E[invperm(order),:]
+    E = E[invperm(order), :]
     E = E ./ E[end]
 
     # put the fixed fluxes back in the right order 
@@ -172,7 +178,7 @@ $(TYPEDSIGNATURES)
 
 Helper function to calculate a nullspace of the matrix A, with all rational entries.
 """
-function rational_nullspace(A::Matrix; tol=norm(A, Inf) * eps(Float64))
+function rational_nullspace(A::Matrix; tol = norm(A, Inf) * eps(Float64))
     m, n = size(A)
     R, pivotrows = rref_with_pivots(A)
     r = length(pivotrows)

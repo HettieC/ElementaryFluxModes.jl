@@ -69,13 +69,13 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Helper function to remove linearly dependent rows of the matrix A, taken 
+Helper function to remove linearly dependent rows of the matrix A, taken
 from DifferentiableMetabolism.jl, using QR decomposition.
 """
 function remove_linearly_dep_rows_qr(A)
-    #= 
+    #=
     Filter out linearly dependent constraints using QR decomposition. Since the
-    problem solved, assume there are no contradictory constraints. 
+    problem solved, assume there are no contradictory constraints.
 
     See: https://math.stackexchange.com/questions/748500/how-to-find-linearly-independent-columns-in-a-matrix
 

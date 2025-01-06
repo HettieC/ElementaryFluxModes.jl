@@ -2,9 +2,9 @@
 $(TYPEDSIGNATURES)
 
 Calculate elementary flux modes of a stoichiometric matrix.
-Input `N` must be the stoichiometric matrix of a network with only 
+Input `N` must be the stoichiometric matrix of a network with only
 forward reactions.
-Output: vector of size (n,k) of the fluxes through the n reactions 
+Output: vector of size (n,k) of the fluxes through the n reactions
 in the k EFMs.
 """
 function get_efms(N::Matrix{Float64}; tol = 1e-15)
@@ -26,7 +26,7 @@ function get_efms(N::Matrix{Float64}; tol = 1e-15)
     # The reaction order of `N` must match that of `K`
     N = N[:, order]
 
-    # Run the double description algorithm 
+    # Run the double description algorithm
 
     R = DDBinary(N, K)
 
@@ -91,7 +91,7 @@ function get_ofms(
     # The reaction order of `N` must match that of `K`
     N = N[:, order]
 
-    # Run the double description algorithm 
+    # Run the double description algorithm
 
     R = DDBinary(N, K)
 
@@ -107,11 +107,11 @@ function get_ofms(
         end
         E[:, i] = mode
     end
-    # put back into original order 
+    # put back into original order
     E = E[invperm(order), :]
     E = E ./ E[end]
 
-    # put the fixed fluxes back in the right order 
+    # put the fixed fluxes back in the right order
     new_E = E[1:fixed_fluxes[1]-1, :]
     new_E = vcat(new_E, E[end, :]' * flux_values[1])
     new_E = vcat(new_E, E[fixed_fluxes[1]:fixed_fluxes[2]-2, :])

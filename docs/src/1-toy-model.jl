@@ -18,13 +18,13 @@ model
 
 N = AbstractFBCModels.stoichiometry(model)
 
-# ## Calculate the EFMs 
+# ## Calculate the EFMs
 
 # Run the double description algorith on `N` and `K`
 
 E = get_efms(Matrix(N))
 
-# If preferred, we can transform the vector of EFMs, **`E`**, into a dictionary 
+# If preferred, we can transform the vector of EFMs, **`E`**, into a dictionary
 # of reaction => fluxes through the efms
 
 EFM_dict = Dict(AbstractFBCModels.reactions(model) .=> eachrow(E))

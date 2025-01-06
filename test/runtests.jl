@@ -8,10 +8,4 @@ using Test
     @testset "Toy model" begin
         include("../docs/src/1-toy-model.jl")
     end
-    # @testset "E coli" begin 
-    #     include("../docs/src/2-ecoli-core.jl")
-    # end
-    # @testset "Differentiate EFMs" begin 
-    #     include("../docs/src/3-differentiate-efms.jl")
-    # end
 end

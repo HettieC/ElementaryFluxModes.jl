@@ -69,19 +69,37 @@ end
 """
 $(TYPEDSIGNATURES)
 
-Helper function to remove linearly dependent rows of the matrix A.
+Helper function to remove linearly dependent rows of the matrix A, taken
+from DifferentiableMetabolism.jl, using QR decomposition.
 """
-function remove_linearly_dep_rows(A::Matrix{Float64}; tol = 1e-15)
-    rA = rref!(copy(Array(A)))
-    idxs = Int[]
-    for (i, row) in enumerate(eachrow(rA))
-        if !all(abs.(row) .<= tol) # remove rows of all zero
-            push!(idxs, i)
+function remove_linearly_dep_rows_qr(A)
+    #=
+    Filter out linearly dependent constraints using QR decomposition. Since the
+    problem solved, assume there are no contradictory constraints.
+
+    See: https://math.stackexchange.com/questions/748500/how-to-find-linearly-independent-columns-in-a-matrix
+
+    Make use of the fact that sparse QR returns a staircase profile with column
+    ordering by default. The default tolerance of what is a 0 seems okay to rely
+    on. Could be a source of bugs though...
+    =#
+    Is, Js, Vs = SparseArrays.findnz(sparse(A))
+
+    a = SparseArrays.sparse(Js, Is, Vs)
+
+    t = LinearAlgebra.qr(a)  # do transpose here for QR
+    max_lin_indep_columns = 0
+    for i in axes(t.R, 2) # depends on preordered QR!
+        Is, _ = SparseArrays.findnz(t.R[:, i])
+        if isempty(Is) || maximum(Is) != i
+            break
+        else
+            max_lin_indep_columns = i
         end
     end
-    return rA[idxs, :], idxs
-end
 
+    return A[sort(t.pcol[1:max_lin_indep_columns]), :] # undo permumation
+end
 
 """
 $(TYPEDSIGNATURES)

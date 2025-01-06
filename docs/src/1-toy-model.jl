@@ -28,4 +28,3 @@ E = get_efms(Matrix(N))
 # of reaction => fluxes through the efms
 
 EFM_dict = Dict(AbstractFBCModels.reactions(model) .=> eachrow(E))
-

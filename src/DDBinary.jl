@@ -8,7 +8,7 @@ Output: vector of size (n,k) of the fluxes through the n reactions
 in the k EFMs.
 """
 function get_efms(N::Matrix{Float64}; tol=1e-15)
-    N = remove_linearly_dep_rows(N)[1]
+    N = remove_linearly_dep_rows_qr(N)
     K = rational_nullspace(Matrix(N))[1]
     # Permute the rows of `K` to be in the form `[I;K*]`
     order = Int64[]
@@ -62,7 +62,7 @@ function get_ofms(N::Matrix{Float64}, fixed_fluxes::Vector{Int}, flux_values::Ve
     fixed_order = sortperm(fixed_fluxes)
     fixed_fluxes = fixed_fluxes[fixed_order]
     flux_values = flux_values[fixed_order]
-    N = remove_linearly_dep_rows(N)[1]
+    N = remove_linearly_dep_rows_qr(N)
     N1 = N[:, setdiff(1:size(N, 2), fixed_fluxes)]
     N2 = N[:, fixed_fluxes]
     w = N2 * flux_values

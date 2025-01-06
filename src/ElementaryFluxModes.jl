@@ -5,7 +5,9 @@ method described in Terzer 2009 thesis for the polyhedral cone Ρ = {x ∈ ℜ^d
 """
 module ElementaryFluxModes
 
-using LinearAlgebra, RowEchelon
+using LinearAlgebra
+using RowEchelon
+using SparseArrays
 using DocStringExtensions
 
 include("utils.jl")

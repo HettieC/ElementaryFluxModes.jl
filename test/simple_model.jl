@@ -66,36 +66,9 @@ model = AC.Model(
     genes = Dict(x.name => x for x in gs),
 )
 
-gene_product_molar_masses = Dict(
-    "g1" => 1.0,
-    "g2" => 1.0,
-    "g3" => 1.0,
-    "g4" => 1.0,
-    "g5" => 1.0,
-)
+gene_product_molar_masses =
+    Dict("g1" => 1.0, "g2" => 1.0, "g3" => 1.0, "g4" => 1.0, "g5" => 1.0)
 
-rid_kcat = Dict(
-    "r3" => 10.0,
-    "r4" => 10.0,
-    "r5" => 5.0
-)
+rid_kcat = Dict("r3" => 10.0, "r4" => 10.0, "r5" => 5.0)
 
-capacity = [
-    (
-        "pool_1",
-        [
-           "g1",
-           "g2",
-           "g3", 
-        ],
-        10.0,
-    ),
-    (
-        "pool_2",
-        [
-            "g4",
-            "g5",
-        ],
-        10.0,
-    ),
-]
+capacity = [("pool_1", ["g1", "g2", "g3"], 10.0), ("pool_2", ["g4", "g5"], 10.0)]

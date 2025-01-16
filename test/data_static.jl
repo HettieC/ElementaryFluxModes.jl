@@ -352,5 +352,5 @@ const ecoli_core_subcellular_location = Dict(
     "b4151" => "membrane",
     "b4152" => "membrane",
     "b4153" => "membrane",
-    "b4154" => "membrane"
+    "b4154" => "membrane",
 )

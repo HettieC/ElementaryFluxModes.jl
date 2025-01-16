@@ -2,14 +2,15 @@
 
 using ElementaryFluxModes
 
-using AbstractFBCModels
+import AbstractFBCModels as A
 import AbstractFBCModels.CanonicalModel as CM
 using JSONFBCModels
-using FastDifferentiation
-using DifferentiableMetabolism
-using COBREXA
+import FastDifferentiation as F
+const Ex = F.Node
+import DifferentiableMetabolism as D
+import COBREXA as X
 using JSON
-using Tulip
+import Tulip as T
 
 # It has been proven that enzyme constrained models with K constraints 
 # will use a maximum of K EFMs in their optimal solution (de Groot 2019 (**check))
@@ -29,13 +30,13 @@ model.reactions["EX_glc__D_e"].lower_bound = -1000.0
 # constrain PFL to zero
 model.reactions["PFL"].upper_bound = 0.0
 
-rid_kcat = Dict(k => FastDifferentiation.Node(Symbol(k)) for (k,_) in ecoli_core_reaction_kcats)
+rid_kcat = Dict(k => Ex(Symbol(k)) for (k,_) in ecoli_core_reaction_kcats)
 kcats = Symbol.(keys(ecoli_core_reaction_kcats))
 
 parameter_values = Dict{Symbol, Float64}()
 
-reaction_isozymes = Dict{String,Dict{String,ParameterIsozyme}}() # a mapping from reaction IDs to isozyme IDs to isozyme structs.
-float_reaction_isozymes = Dict{String,Dict{String,COBREXA.Isozyme}}() #src
+reaction_isozymes = Dict{String,Dict{String,X.IsozymeT{Ex}}}() # a mapping from reaction IDs to isozyme IDs to isozyme structs.
+float_reaction_isozymes = Dict{String,Dict{String,X.Isozyme}}() #src
 for (rid,rxn) in model.reactions
     grrs = rxn.gene_association_dnf
     isnothing(grrs) && continue # skip if no grr available
@@ -45,14 +46,14 @@ for (rid,rxn) in model.reactions
         kcat = ecoli_core_reaction_kcats[rid] * 3.6 # change unit to k/h
         parameter_values[Symbol(rid)] = kcat
 
-        d = get!(reaction_isozymes, rid, Dict{String,ParameterIsozyme}())
-        d["isozyme_$i"] = ParameterIsozyme(
+        d = get!(reaction_isozymes, rid, Dict{String,X.IsozymeT{Ex}}())
+        d["isozyme_$i"] = X.IsozymeT{Ex}(
             gene_product_stoichiometry = Dict(grr .=> fill(1.0, size(grr))), # assume subunit stoichiometry of 1 for all isozymes
-            kcat_forward = rid_kcat[rid],
+            kcat_forward = rid_kcat[rid], # assume forward and reverse have the same kcat
             kcat_reverse = rid_kcat[rid],
         )
-        d2 = get!(float_reaction_isozymes, rid, Dict{String,COBREXA.Isozyme}()) #src
-        d2["isozyme_$i"] = COBREXA.Isozyme( #src
+        d2 = get!(float_reaction_isozymes, rid, Dict{String,X.Isozyme}()) #src
+        d2["isozyme_$i"] = X.Isozyme( #src
             gene_product_stoichiometry = Dict(grr .=> fill(1.0, size(grr))), #src
             kcat_forward = kcat, #src
             kcat_reverse = kcat, #src
@@ -60,38 +61,37 @@ for (rid,rxn) in model.reactions
     end
 end
 
-
 gene_product_molar_masses = Dict(k => v for (k, v) in ecoli_core_gene_product_masses)
 
 capacity = [
     (
-        "membrane",
+        :membrane, # enzyme group names must be of type Symbol
         [x for (x,y) in ecoli_core_subcellular_location if y == "membrane"],
         15.0,
     ),
     (
-        "cytosol",
+        :cytosol,
         [x for (x,y) in ecoli_core_subcellular_location if y == "cytosol"],
         35.0,
     ),
 ]
 
-km = build_kinetic_model(
+km = X.enzyme_constrained_flux_balance_constraints( # kinetic model
     model;
     reaction_isozymes,
     gene_product_molar_masses,
-    capacity
+    capacity,
 )
 
-ec_solution, _, _, _ = optimized_constraints_with_parameters(
+ec_solution = D.optimized_values(
     km,
     parameter_values;
     objective = km.objective.value,
-    optimizer = Tulip.Optimizer,
-    modifications = [COBREXA.set_optimizer_attribute("IPM_IterationsLimit", 10_000)],
+    optimizer = T.Optimizer,
+    settings = [X.set_optimizer_attribute("IPM_IterationsLimit", 10_000)],
 )
 
-ec_solution
+ec_solution.tree
 
 ec_solution_cobrexa = enzyme_constrained_flux_balance_analysis( #src
     model; #src
@@ -106,8 +106,8 @@ ec_solution_cobrexa = enzyme_constrained_flux_balance_analysis( #src
 # This solution is both producing acetate and consuming oxygen, therefore it looks like 
 # overflow metabolism. 
 
-ec_solution.fluxes["EX_ac_e"]
-ec_solution.fluxes["EX_o2_e"]
+ec_solution.tree.fluxes["EX_ac_e"]
+ec_solution.tree.fluxes["EX_o2_e"]
 
 # Since we had two enzyme pools, the membrane and the cytosol, this optimal 
 # solution will be composed of at most two EFMs. In order to find out how 
@@ -116,13 +116,13 @@ ec_solution.fluxes["EX_o2_e"]
 # superposition of the two EFMs, and we can differentiate it.
 
 # This solution contains many inactive reactions
-sort(collect(ec_solution.fluxes), by=ComposedFunction(abs, last))
+sort(collect(ec_solution.tree.fluxes), by=ComposedFunction(abs, last))
 
-@test any(values(ec_solution.fluxes) .≈ 0) #src
+@test any(values(ec_solution.tree.fluxes) .≈ 0) #src
 
 # And also many inactive gene products. 
 
-sort(collect(ec_solution.gene_product_amounts), by=last)
+sort(collect(ec_solution.tree.gene_product_amounts), by=last)
 
 @test any(isapprox.(values(ec_solution.gene_product_amounts), 0, atol=1e-8)) #src
 
@@ -131,61 +131,53 @@ sort(collect(ec_solution.gene_product_amounts), by=last)
 flux_zero_tol = 1e-6 # these bounds make a real difference!
 gene_zero_tol = 1e-6 
 
-pruned_reaction_isozymes =
-    prune_reaction_isozymes(reaction_isozymes, ec_solution, flux_zero_tol)
+# pruned_reaction_isozymes =
+#     prune_reaction_isozymes(reaction_isozymes, ec_solution, flux_zero_tol)
 
-pruned_parameter_values = Dict(x=>y for (x,y) in parameter_values if haskey(pruned_reaction_isozymes,String(x)))
+# pruned_parameter_values = Dict(x=>y for (x,y) in parameter_values if haskey(pruned_reaction_isozymes,String(x)))
 
-pruned_gene_product_molar_masses =
-    prune_gene_product_molar_masses(gene_product_molar_masses, ec_solution, gene_zero_tol)
+pruned_model, pruned_reaction_isozymes = D.prune_model(
+    model,
+    ec_solution.tree.fluxes,
+    ec_solution.tree.gene_product_amounts,
+    reaction_isozymes,
+    ec_solution.tree.isozyme_forward_amounts,
+    ec_solution.tree.isozyme_reverse_amounts,
+    flux_zero_tol,
+    gene_zero_tol,
+);
 
-pruned_model = prune_model(model, ec_solution, flux_zero_tol, gene_zero_tol)
-
-# Not that for EFM calculations to work, all reactions must be in the forward direction,
-# so we reverse any reactions running backwards in the solution 
-# reverse any backwards reactions, and reverse the associated isozymes.
-
-for (r, rxn) in pruned_model.reactions
-    if rxn.lower_bound < 0 && ec_solution.fluxes[r] < 0
-        pruned_model.reactions[r].upper_bound = -rxn.lower_bound
-        pruned_model.reactions[r].lower_bound = 0
-        pruned_model.reactions[r].stoichiometry = Dict(x => -y for (x, y) in rxn.stoichiometry)
-        !haskey(pruned_reaction_isozymes,r) && continue 
-        original_isozyme = collect(values(pruned_reaction_isozymes[r]))[1]
-        pruned_reaction_isozymes[r] = Dict(
-            r => ParameterIsozyme(
-                original_isozyme.gene_product_stoichiometry,
-                original_isozyme.kcat_reverse,
-                nothing
-            )
-        )
-    end
-end
-
-# Build the pruned kinetic model 
-
-pkm = build_kinetic_model(
+pkm = X.enzyme_constrained_flux_balance_constraints( # pruned kinetic model
     pruned_model;
     reaction_isozymes = pruned_reaction_isozymes,
-    gene_product_molar_masses = pruned_gene_product_molar_masses,
+    gene_product_molar_masses,
     capacity,
 )
 
-# Check that this is indeed a unique solution 
-pruned_ec_solution, _, _, _ = optimized_constraints_with_parameters(
+pruned_solution = D.optimized_values(
     pkm,
     parameter_values;
     objective = pkm.objective.value,
-    optimizer = Tulip.Optimizer,
-    modifications = [COBREXA.set_optimizer_attribute("IPM_IterationsLimit", 10_000)],
+    optimizer = T.Optimizer,
+    settings = [X.set_optimizer_attribute("IPM_IterationsLimit", 10_000)],
 )
+
+# All reactions with zero flux have been removed.
+
+sort(collect(pruned_solution.tree.fluxes), by = ComposedFunction(abs, last))
+
+# Genes with zero concentration have also been removed.
+
+sort(abs.(collect(values(pruned_solution.tree.gene_product_amounts))))
 
 # TODO check fluxes and gene amounts same 
 
 # ## Optimal flux modes (OFMs)
 
-# In this model, we have a fixed ATP maintenance flux
-pruned_ec_solution.fluxes["ATPM"]
+# We now wish to find the optimal flux modes (OFMs) of this optimal solution.
+
+# In our model, we have a fixed ATP maintenance flux
+pruned_model.reactions["ATPM"].lower_bound
 
 # As a result of this fixed flux, EFM theory does not hold. Instead,
 # we investigate the optimal flux modes (OFMs). These are the flux modes 
@@ -196,14 +188,17 @@ pruned_ec_solution.fluxes["ATPM"]
 # use the same `find_efms` function, since this augmented matrix behaves 
 # as required for the algorithm to work.
 
-N = AbstractFBCModels.stoichiometry(pruned_model)
+N = A.stoichiometry(pruned_model)
 
-# Take the fixed fluxes (here only ATPM) and the objective flux for the matrix `N2`
+# Take the fixed fluxes (here only ATPM) and the objective flux
 
-atpm_idx = findfirst(x -> x == "ATPM", AbstractFBCModels.reactions(pruned_model))
-biomass_idx = findfirst(x -> x == "BIOMASS_Ecoli_core_w_GAM", AbstractFBCModels.reactions(pruned_model))
+atpm_idx = findfirst(x -> x == "ATPM", A.reactions(pruned_model))
+biomass_idx = findfirst(x -> x == "BIOMASS_Ecoli_core_w_GAM", A.reactions(pruned_model))
 fixed_fluxes = [atpm_idx,biomass_idx]
-flux_values = [pruned_ec_solution.fluxes["ATPM"],pruned_ec_solution.fluxes["BIOMASS_Ecoli_core_w_GAM"]]
+flux_values = [pruned_solution.tree.fluxes["ATPM"],pruned_solution.tree.fluxes["BIOMASS_Ecoli_core_w_GAM"]]
+
+# Build two new matrices, `N1` consists of the reactions with unbounded flux reaction_fluxes
+# and `N2` contains the reactions with fixed fluxes.
 
 N1 = N[:, setdiff(1:size(N,2), fixed_fluxes)]
 N2 = N[:, fixed_fluxes]
@@ -235,7 +230,7 @@ OFM_dicts[2]["EX_o2_e"]
 # It is of interest to see how changes in the kinetic parameters affects this 
 # optimal weighting.
 
-parameters = FastDifferentiation.Node.(collect(keys(pruned_parameter_values)))
+parameters = Ex.(collect(keys(pruned_parameter_values)))
 param_vals = collect(values(pruned_parameter_values))
 rid_gcounts = Dict(rid => [v.gene_product_stoichiometry for (k, v) in d][1] for (rid, d) in pruned_reaction_isozymes)
 rid_pid = Dict(rid => [iso.kcat_forward for (k, iso) in v][1] for (rid, v) in pruned_reaction_isozymes)

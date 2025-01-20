@@ -133,7 +133,7 @@ The input variables are:
 Output:
 -R: binary elementary flux modes
 """
-function _DDBinary(N, K)
+function DDBinary(N, K)
     R_binary = Matrix(I(size(K, 2)))
     already_pos = size(K, 2)
     R_remaining = K[size(R_binary, 1)+1:end, :]
@@ -177,7 +177,7 @@ $(TYPEDSIGNATURES)
 
 Helper function to calculate a nullspace of the matrix A, with all rational entries.
 """
-function _rational_nullspace(A::Matrix; tol = norm(A, Inf) * eps(Float64))
+function rational_nullspace(A::Matrix; tol = norm(A, Inf) * eps(Float64))
     m, n = size(A)
     R, pivotrows = rref_with_pivots(A)
     r = length(pivotrows)
@@ -209,7 +209,7 @@ Return a bitmap of the input vector, where entries are 1 if the vector entry is
 greater than zero, and zero if the entries are zero.
 Return an error if any entries of the vector are less than zero.
 """
-function _make_bitmap(row)
+function make_bitmap(row)
     bitmap = Bool[]
     for x in row
         if x > 0
@@ -229,7 +229,7 @@ $(TYPEDSIGNATURES)
 
 Return the zero set of a vector
 """
-_zero_set(vec) = [i for (i, x) in enumerate(vec) if x == 0]
+zero_set(vec) = [i for (i, x) in enumerate(vec) if x == 0]
 
 """
 $(TYPEDSIGNATURES)
@@ -238,7 +238,7 @@ Check adjacency of columns i and j in r by making sure that there exists no othe
 extreme ray in R whose zero set is a superset of the intersection of the zero sets
 of ray i and ray j.
 """
-function _check_adjacency(i, j, R)
+function check_adjacency(i, j, R)
     z1 = zero_set(R[:, i])
     z2 = zero_set(R[:, j])
     z = intersect(z1, z2)

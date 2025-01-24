@@ -14,7 +14,7 @@ using JSON
 import Tulip as T
 
 # It has been proven that enzyme constrained models with K constraints 
-# will use a maximum of K EFMs in their optimal solution (de Groot 2019 (**check))
+# will use a maximum of K EFMs in their optimal solution (de Groot 2019).
 
 # Here, we take the _E. coli_ core model with two enzyme constraints, find the optimal 
 # solution, and then find the EFMs in the optimal solution.
@@ -74,7 +74,7 @@ ec_solution = X.enzyme_constrained_flux_balance_analysis(
 ec_solution
 
 # This solution is both producing acetate and consuming oxygen, therefore it looks like 
-# overflow metabolism. 
+# overflow metabolism.
 
 ec_solution.fluxes["EX_ac_e"]
 ec_solution.fluxes["EX_o2_e"]
@@ -156,6 +156,7 @@ sort(abs.(collect(values(pruned_solution.tree.gene_product_amounts))))
 # We now wish to find the optimal flux modes (OFMs) of this optimal solution.
 
 # In our model, we have a fixed ATP maintenance flux
+
 pruned_model.reactions["ATPM"].lower_bound
 
 # As a result of this fixed flux, standard EFM theory does not hold. Instead,
@@ -204,7 +205,7 @@ OFM_dicts[1]["EX_ac_e"]
 OFM_dicts[2]["EX_etoh_e"]
 OFM_dicts[2]["EX_ac_e"]
 
-# ## Differentiate OFM usage 
+# ## Differentiate OFM usage
 
 # The weighted sum of these two OFMs is equal to the whole optimal flux solution,
 # and can be easily calculated using two non-shared reactions
@@ -222,10 +223,10 @@ v = [
 
 λ = M \ v
 
-# `λ` tells us the weighting of the two OFMs, so here we have 0.6 units of flux 
+# `λ` tells us the weighting of the two OFMs, so here we have 0.6 units of flux
 # through OFM₁ and 0.1 units of flux through OFM₂ to produce our optimal biomass.
 
-# It is of interest to see how changes in the kinetic parameters affect this 
+# It is of interest to see how changes in the kinetic parameters affect this
 # optimal weighting.
 
 parameters = Ex.(collect(keys(parameter_values)))
@@ -280,7 +281,7 @@ f
 
 # We see that most kinetic parameters have little effect on the optimal OFM weightings,
 # see the reactions from RPE to PGI. Those parameters that do affect optimal weightings
-# always increase the use of one OFM and decrease the use of the other. 
+# always increase the use of one OFM and decrease the use of the other.
 
-# Increasing the turnover number of PGK is predicted to decrease the optimal flux through 
+# Increasing the turnover number of PGK is predicted to decrease the optimal flux through
 # the acetate producing OFM, and increase the optimal flux through the ethanol producing OFM.

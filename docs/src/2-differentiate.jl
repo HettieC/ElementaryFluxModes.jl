@@ -3,7 +3,7 @@
 # The optimal flux distribution of any metabolic model can be written as a 
 # weighted sum of the EFMs of that model. We are interested in calculating 
 # the sensitivity of these weightings to the model parameters, and can use 
-# DifferentiableMetabolism.jl to efficiently do so. 
+# DifferentiableMetabolism.jl to efficiently do so.
 
 using ElementaryFluxModes
 
@@ -85,7 +85,7 @@ ec_solution_fba = enzyme_constrained_flux_balance_analysis( #src
 # Therefore, we may calculate the EFMs of this solution and directly differentiate
 # them, with no pruning required.
 
-# ## Calculate EFMs of the optimal solution 
+# ## Calculate EFMs of the optimal solution
 
 # We need to input the stoichiometric matrix `N` into ElementaryFluxModes.jl
 
@@ -96,7 +96,7 @@ N = A.stoichiometry(model)
 
 E = get_efms(Matrix(N))
 
-# Make a dictionary out of the EFM result 
+# Make a dictionary out of the EFM result
 
 EFM_dict = Dict(A.reactions(model) .=> eachrow(E))
 EFMs = [
@@ -113,7 +113,7 @@ EFMs = [
     "r4" => [1.0, 0.0]) #src
 
 # The optimal solution, **v**, can be written as λ₁**EFM₁**+λ₂**EFM₂**=**v**
-# so that the λ give us the weightings of the two EFMs. 
+# so that the λ give us the weightings of the two EFMs.
 
 # Let's calculate λ₁ and λ₂, using reactions `r1` and `r5`, as these are not 
 # shared by the EFMs
@@ -133,7 +133,7 @@ v = [
 # The optimal solution is therefore made up of 50 units of flux through EFM₁
 # and 25 units of flux through EFM₂.
 
-# ## Differentiate the EFMs 
+# ## Differentiate the EFMs
 
 # We have calculated the EFMs, and now wish to differentiate their weightings, 
 # `λ`, with respect to the model parameters

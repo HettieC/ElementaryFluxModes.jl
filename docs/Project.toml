@@ -1,12 +1,17 @@
 [deps]
 AbstractFBCModels = "5a4f3dfa-1789-40f8-8221-69268c29937c"
 COBREXA = "babc4406-5200-4a30-9033-bf5ae714c842"
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
 ConstraintTrees = "5515826b-29c3-47a5-8849-8513ac836620"
+DifferentiableMetabolism = "9677e053-0fc1-49e6-98a8-2ad3a1525e54"
 DocStringExtensions = "ffbed154-4ef7-542d-bbb7-c09d3a79fcae"
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 ElementaryFluxModes = "89210afb-bb0f-413a-8ffa-8390a41acbf2"
+Escher = "8cc96de1-1b23-48cb-9272-618d67962629"
+FastDifferentiation = "eb9bf01b-bf85-4b60-bf87-ee5de06c00be"
 JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
 JSONFBCModels = "475c1105-d6ed-49c1-9b32-c11adca6d3e8"
+JuMP = "4076af6c-e467-56ae-b986-b466b2749572"
 Literate = "98b081ad-f1c9-55d3-8b20-4c87d4299306"
 Tulip = "6dd1b50a-3aae-11e9-10b5-ef983d2400fa"
 

@@ -15,7 +15,6 @@ using COBREXA
 import COBREXA as X
 using JSON
 import Tulip as T
-using CairoMakie
 
 # ## Build a simple enzyme constrained model
 
@@ -150,4 +149,3 @@ sens_efm = differentiate_efm(EFMs, parameters, rid_pid, parameter_values, rid_gc
     2.5  -0.0   2.5
     -0.0   5.0  -0.0
 ] #src 
-

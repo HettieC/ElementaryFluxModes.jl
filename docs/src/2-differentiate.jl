@@ -104,13 +104,13 @@ EFMs = [
     Dict(k => v[2] / EFM_dict["r6"][2] for (k, v) in EFM_dict),
 ]
 
-@test EFM_dict == Dict(
-    "r1" => [1.0, 0.0],
-    "r2" => [1.0, 1.0],
-    "r5" => [0.0, 1.0],
-    "r6" => [1.0, 1.0],
-    "r3" => [1.0, 0.0],
-    "r4" => [1.0, 0.0],
+@test EFM_dict == Dict( #src
+    "r1" => [1.0, 0.0], #src
+    "r2" => [1.0, 1.0], #src
+    "r5" => [0.0, 1.0], #src
+    "r6" => [1.0, 1.0], #src
+    "r3" => [1.0, 0.0], #src
+    "r4" => [1.0, 0.0], #src
 ) #src
 
 # The optimal solution, **v**, can be written as λ₁**EFM₁**+λ₂**EFM₂**=**v**
@@ -155,7 +155,7 @@ sens_efm = differentiate_efm(
     T.Optimizer,
 )
 
-@test sens_efm == [
-    2.5 -0.0 2.5
-    -0.0 5.0 -0.0
+@test sens_efm == [ #src
+    2.5 -0.0 2.5 #src
+    -0.0 5.0 -0.0 #src
 ] #src 

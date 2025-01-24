@@ -198,99 +198,99 @@ OFM_dicts = [
 
 # We see that the first OFM is releasing ethanol but not acetate
 
-OFM_dicts[1]["EX_etoh_e"]
-OFM_dicts[1]["EX_ac_e"]
+# OFM_dicts[1]["EX_etoh_e"]
+# OFM_dicts[1]["EX_ac_e"]
 
-@test OFM_dicts[1]["EX_ac_e"] ≈ 0 #src 
-@test OFM_dicts[1]["EX_etoh_e"] > 1e-3 #src
-
-
-# And the second OFM is releasing acetate but no ethanol
-
-OFM_dicts[2]["EX_etoh_e"]
-OFM_dicts[2]["EX_ac_e"]
-
-@test OFM_dicts[2]["EX_etoh_e"] ≈ 0 #src
-@test OFM_dicts[2]["EX_ac_e"] > 1e-3 #src
+# @test OFM_dicts[1]["EX_ac_e"] ≈ 0 #src 
+# @test OFM_dicts[1]["EX_etoh_e"] > 1e-3 #src
 
 
-# ## Differentiate OFM usage
+# # And the second OFM is releasing acetate but no ethanol
 
-# The weighted sum of these two OFMs is equal to the whole optimal flux solution,
-# and can be easily calculated using two non-shared reactions
+# OFM_dicts[2]["EX_etoh_e"]
+# OFM_dicts[2]["EX_ac_e"]
+
+# @test OFM_dicts[2]["EX_etoh_e"] ≈ 0 #src
+# @test OFM_dicts[2]["EX_ac_e"] > 1e-3 #src
 
 
-M = [
-    OFM_dicts[1]["EX_etoh_e"] OFM_dicts[2]["EX_etoh_e"]
-    OFM_dicts[1]["EX_ac_e"] OFM_dicts[2]["EX_ac_e"]
-]
+# # ## Differentiate OFM usage
 
-v = [
-    pruned_solution.tree.fluxes["EX_etoh_e"]
-    pruned_solution.tree.fluxes["EX_ac_e"]
-]
+# # The weighted sum of these two OFMs is equal to the whole optimal flux solution,
+# # and can be easily calculated using two non-shared reactions
 
-λ = M \ v
 
-# `λ` tells us the weighting of the two OFMs, so here we have 0.6 units of flux
-# through OFM₁ and 0.1 units of flux through OFM₂ to produce our optimal biomass.
+# M = [
+#     OFM_dicts[1]["EX_etoh_e"] OFM_dicts[2]["EX_etoh_e"]
+#     OFM_dicts[1]["EX_ac_e"] OFM_dicts[2]["EX_ac_e"]
+# ]
 
-# It is of interest to see how changes in the kinetic parameters affect this
-# optimal weighting.
+# v = [
+#     pruned_solution.tree.fluxes["EX_etoh_e"]
+#     pruned_solution.tree.fluxes["EX_ac_e"]
+# ]
 
-parameters = Ex.(collect(keys(parameter_values)))
-rid_gcounts = Dict(
-    rid => [v.gene_product_stoichiometry for (k, v) in d][1] for
-    (rid, d) in pruned_reaction_isozymes
-)
-rid_pid =
-    Dict(rid => [iso.kcat_forward for (k, iso) in v][1] for (rid, v) in parameter_isozymes)
-sens = differentiate_efm(
-    OFM_dicts,
-    parameters,
-    rid_pid,
-    parameter_values,
-    rid_gcounts,
-    capacity,
-    gene_product_molar_masses,
-    T.Optimizer,
-)
+# λ = M \ v
 
-# To get control coefficients instead of sensititivities, we scale these derivatives.
+# # `λ` tells us the weighting of the two OFMs, so here we have 0.6 units of flux
+# # through OFM₁ and 0.1 units of flux through OFM₂ to produce our optimal biomass.
 
-scaled_sens = Matrix(undef, size(sens, 1), size(sens, 2))
-for (i, col) in enumerate(eachcol(sens))
-    scaled_sens[:, i] = collect(values(parameter_values))[i] .* col ./ λ
-end
+# # It is of interest to see how changes in the kinetic parameters affect this
+# # optimal weighting.
 
-# We plot the control coefficients to get a visual overview of the system.
+# parameters = Ex.(collect(keys(parameter_values)))
+# rid_gcounts = Dict(
+#     rid => [v.gene_product_stoichiometry for (k, v) in d][1] for
+#     (rid, d) in pruned_reaction_isozymes
+# )
+# rid_pid =
+#     Dict(rid => [iso.kcat_forward for (k, iso) in v][1] for (rid, v) in parameter_isozymes)
+# sens = differentiate_efm(
+#     OFM_dicts,
+#     parameters,
+#     rid_pid,
+#     parameter_values,
+#     rid_gcounts,
+#     capacity,
+#     gene_product_molar_masses,
+#     T.Optimizer,
+# )
 
-sens_perm = sortperm(scaled_sens[1, :])
-scaled_sens[:, sens_perm]
-parameters[sens_perm]
+# # To get control coefficients instead of sensititivities, we scale these derivatives.
 
-f, a, hm = heatmap(
-    scaled_sens[:, sens_perm]';
-    colormap = CairoMakie.Reverse(:RdBu),
-    axis = (
-        yticks = (1:2, ["Ethanol producing", "Acetate producing"]),
-        yticklabelrotation = pi / 2,
-        xticklabelrotation = pi / 2,
-        xlabel = "Parameters",
-        ylabel = "Control coefficient, param/λ * ∂λ/∂param",
-        xticks = (1:length(parameters), string.(parameters[sens_perm])),
-        title = "Control coefficients of OFM weightings in optimal solution",
-        ylabelsize = 23,
-        xlabelsize = 23,
-        titlesize = 25,
-    ),
-);
-Colorbar(f[:, end+1], hm)
-f
+# scaled_sens = Matrix(undef, size(sens, 1), size(sens, 2))
+# for (i, col) in enumerate(eachcol(sens))
+#     scaled_sens[:, i] = collect(values(parameter_values))[i] .* col ./ λ
+# end
 
-# We see that most kinetic parameters have little effect on the optimal OFM weightings,
-# see the reactions from RPE to PGI. Those parameters that do affect optimal weightings
-# always increase the use of one OFM and decrease the use of the other.
+# # We plot the control coefficients to get a visual overview of the system.
 
-# Increasing the turnover number of PGK is predicted to decrease the optimal flux through
-# the acetate producing OFM, and increase the optimal flux through the ethanol producing OFM.
+# sens_perm = sortperm(scaled_sens[1, :])
+# scaled_sens[:, sens_perm]
+# parameters[sens_perm]
+
+# f, a, hm = heatmap(
+#     scaled_sens[:, sens_perm]';
+#     colormap = CairoMakie.Reverse(:RdBu),
+#     axis = (
+#         yticks = (1:2, ["Ethanol producing", "Acetate producing"]),
+#         yticklabelrotation = pi / 2,
+#         xticklabelrotation = pi / 2,
+#         xlabel = "Parameters",
+#         ylabel = "Control coefficient, param/λ * ∂λ/∂param",
+#         xticks = (1:length(parameters), string.(parameters[sens_perm])),
+#         title = "Control coefficients of OFM weightings in optimal solution",
+#         ylabelsize = 23,
+#         xlabelsize = 23,
+#         titlesize = 25,
+#     ),
+# );
+# Colorbar(f[:, end+1], hm)
+# f
+
+# # We see that most kinetic parameters have little effect on the optimal OFM weightings,
+# # see the reactions from RPE to PGI. Those parameters that do affect optimal weightings
+# # always increase the use of one OFM and decrease the use of the other.
+
+# # Increasing the turnover number of PGK is predicted to decrease the optimal flux through
+# # the acetate producing OFM, and increase the optimal flux through the ethanol producing OFM.

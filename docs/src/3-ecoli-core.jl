@@ -12,6 +12,7 @@ using COBREXA
 import COBREXA as X
 using JSON
 import Tulip as T
+using CairoMakie
 
 # It has been proven that enzyme constrained models with K constraints 
 # will use a maximum of K EFMs in their optimal solution (de Groot 2019).

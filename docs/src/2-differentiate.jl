@@ -110,7 +110,8 @@ EFMs = [
     "r5" => [0.0, 1.0],
     "r6" => [1.0, 1.0],
     "r3" => [1.0, 0.0],
-    "r4" => [1.0, 0.0]) #src
+    "r4" => [1.0, 0.0],
+) #src
 
 # The optimal solution, **v**, can be written as λ₁**EFM₁**+λ₂**EFM₂**=**v**
 # so that the λ give us the weightings of the two EFMs.

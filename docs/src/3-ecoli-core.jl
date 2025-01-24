@@ -45,9 +45,9 @@ for (rid, rxn) in model.reactions
 
         d = get!(float_reaction_isozymes, rid, Dict{String,X.Isozyme}())
         d["isozyme_$i"] = X.Isozyme(
-            gene_product_stoichiometry=Dict(grr .=> fill(1.0, size(grr))), # assume subunit stoichiometry of 1 for all isozymes
-            kcat_forward=kcat, # assume forward and reverse have the same kcat
-            kcat_reverse=kcat,
+            gene_product_stoichiometry = Dict(grr .=> fill(1.0, size(grr))), # assume subunit stoichiometry of 1 for all isozymes
+            kcat_forward = kcat, # assume forward and reverse have the same kcat
+            kcat_reverse = kcat,
         )
     end
 end
@@ -60,19 +60,15 @@ capacity = [
         [x for (x, y) in ecoli_core_subcellular_location if y == "membrane"],
         15.0,
     ),
-    (
-        "cytosol",
-        [x for (x, y) in ecoli_core_subcellular_location if y == "cytosol"],
-        35.0,
-    ),
+    ("cytosol", [x for (x, y) in ecoli_core_subcellular_location if y == "cytosol"], 35.0),
 ]
 
 ec_solution = X.enzyme_constrained_flux_balance_analysis(
     model;
-    reaction_isozymes=float_reaction_isozymes,
+    reaction_isozymes = float_reaction_isozymes,
     gene_product_molar_masses,
     capacity,
-    optimizer=T.Optimizer
+    optimizer = T.Optimizer,
 )
 
 ec_solution
@@ -90,15 +86,15 @@ ec_solution.fluxes["EX_o2_e"]
 # superposition of the two EFMs, and we can differentiate it.
 
 # This solution contains many inactive reactions
-sort(collect(ec_solution.fluxes), by=ComposedFunction(abs, last))
+sort(collect(ec_solution.fluxes), by = ComposedFunction(abs, last))
 
 @test any(values(ec_solution.fluxes) .≈ 0) #src
 
 # And also many inactive gene products. 
 
-sort(collect(ec_solution.gene_product_amounts), by=last)
+sort(collect(ec_solution.gene_product_amounts), by = last)
 
-@test any(isapprox.(values(ec_solution.gene_product_amounts), 0, atol=1e-8)) #src
+@test any(isapprox.(values(ec_solution.gene_product_amounts), 0, atol = 1e-8)) #src
 
 # Let us start by pruning the model.
 
@@ -118,7 +114,9 @@ pruned_model, pruned_reaction_isozymes = D.prune_model(
 # Since we will later be differentiating our solution, we need to make 
 # parameter isozymes and a kinetic model
 
-parameter_values = Dict(Symbol(x) => iso.kcat_forward for (x, y) in pruned_reaction_isozymes for (_, iso) in y)
+parameter_values = Dict(
+    Symbol(x) => iso.kcat_forward for (x, y) in pruned_reaction_isozymes for (_, iso) in y
+)
 
 rid_kcat = Dict(k => Ex(Symbol(k)) for (k, _) in parameter_values)
 parameter_isozymes = Dict(
@@ -126,16 +124,14 @@ parameter_isozymes = Dict(
         "isozyme" => X.IsozymeT{Ex}(
             iso.gene_product_stoichiometry,
             rid_kcat[Symbol(x)],
-            nothing
-        )
-        for (_, iso) in y
-    )
-    for (x, y) in pruned_reaction_isozymes
+            nothing,
+        ) for (_, iso) in y
+    ) for (x, y) in pruned_reaction_isozymes
 )
 
 pkm = X.enzyme_constrained_flux_balance_constraints( # kinetic model
     pruned_model;
-    reaction_isozymes=parameter_isozymes,
+    reaction_isozymes = parameter_isozymes,
     gene_product_molar_masses,
     capacity,
 )
@@ -143,13 +139,13 @@ pkm = X.enzyme_constrained_flux_balance_constraints( # kinetic model
 pruned_solution = D.optimized_values(
     pkm,
     parameter_values;
-    objective=pkm.objective.value,
-    optimizer=T.Optimizer,
+    objective = pkm.objective.value,
+    optimizer = T.Optimizer,
 )
 
 # All reactions with zero flux have been removed in the pruned model
 
-sort(collect(pruned_solution.tree.fluxes), by=ComposedFunction(abs, last))
+sort(collect(pruned_solution.tree.fluxes), by = ComposedFunction(abs, last))
 
 # Genes with zero concentration have also been removed.
 
@@ -178,21 +174,24 @@ N = A.stoichiometry(pruned_model)
 atpm_idx = findfirst(x -> x == "ATPM", A.reactions(pruned_model))
 biomass_idx = findfirst(x -> x == "BIOMASS_Ecoli_core_w_GAM", A.reactions(pruned_model))
 fixed_fluxes = [atpm_idx, biomass_idx]
-flux_values = [pruned_solution.tree.fluxes["ATPM"], pruned_solution.tree.fluxes["BIOMASS_Ecoli_core_w_GAM"]]
+flux_values = [
+    pruned_solution.tree.fluxes["ATPM"],
+    pruned_solution.tree.fluxes["BIOMASS_Ecoli_core_w_GAM"],
+]
 
 # Calculate the OFMs, using the `get_ofms` function
 
 OFMs = get_ofms(Matrix(N), fixed_fluxes, flux_values)
 OFM_dicts = [
     Dict(A.reactions(pruned_model) .=> OFMs[:, 1]),
-    Dict(A.reactions(pruned_model) .=> OFMs[:, 2])
+    Dict(A.reactions(pruned_model) .=> OFMs[:, 2]),
 ]
 
 # Scale the OFMs to have one unit flux through biomass
 
 OFM_dicts = [
-    Dict(x=>y/OFM_dicts[1]["BIOMASS_Ecoli_core_w_GAM"] for (x,y) in OFM_dicts[1]),
-    Dict(x=>y/OFM_dicts[2]["BIOMASS_Ecoli_core_w_GAM"] for (x,y) in OFM_dicts[2])
+    Dict(x => y / OFM_dicts[1]["BIOMASS_Ecoli_core_w_GAM"] for (x, y) in OFM_dicts[1]),
+    Dict(x => y / OFM_dicts[2]["BIOMASS_Ecoli_core_w_GAM"] for (x, y) in OFM_dicts[2]),
 ]
 
 # We see that the first OFM is releasing ethanol but not acetate
@@ -212,12 +211,12 @@ OFM_dicts[2]["EX_ac_e"]
 
 
 M = [
-    OFM_dicts[1]["EX_etoh_e"] OFM_dicts[2]["EX_etoh_e"];
+    OFM_dicts[1]["EX_etoh_e"] OFM_dicts[2]["EX_etoh_e"]
     OFM_dicts[1]["EX_ac_e"] OFM_dicts[2]["EX_ac_e"]
 ]
 
 v = [
-    pruned_solution.tree.fluxes["EX_etoh_e"];
+    pruned_solution.tree.fluxes["EX_etoh_e"]
     pruned_solution.tree.fluxes["EX_ac_e"]
 ]
 
@@ -230,9 +229,22 @@ v = [
 # optimal weighting.
 
 parameters = Ex.(collect(keys(parameter_values)))
-rid_gcounts = Dict(rid => [v.gene_product_stoichiometry for (k, v) in d][1] for (rid, d) in pruned_reaction_isozymes)
-rid_pid = Dict(rid => [iso.kcat_forward for (k, iso) in v][1] for (rid, v) in parameter_isozymes)
-sens = differentiate_efm(OFM_dicts, parameters, rid_pid, parameter_values, rid_gcounts, capacity, gene_product_molar_masses, T.Optimizer)
+rid_gcounts = Dict(
+    rid => [v.gene_product_stoichiometry for (k, v) in d][1] for
+    (rid, d) in pruned_reaction_isozymes
+)
+rid_pid =
+    Dict(rid => [iso.kcat_forward for (k, iso) in v][1] for (rid, v) in parameter_isozymes)
+sens = differentiate_efm(
+    OFM_dicts,
+    parameters,
+    rid_pid,
+    parameter_values,
+    rid_gcounts,
+    capacity,
+    gene_product_molar_masses,
+    T.Optimizer,
+)
 
 # To get control coefficients instead of sensititivities, we scale these derivatives.
 
@@ -250,14 +262,14 @@ parameters[sens_perm]
 f, a, hm = heatmap(
     scaled_sens[:, sens_perm]';
     colormap = Reverse(:RdBu),
-    axis=(
-        yticks=(1:2, ["Ethanol producing", "Acetate producing"]),
-        yticklabelrotation=pi / 2,
-        xticklabelrotation=pi / 2,
-        xlabel="Parameters",
-        ylabel="Control coefficient, param/λ * ∂λ/∂param",
-        xticks=(1:length(parameters), string.(parameters[sens_perm])),
-        title="Control coefficients of OFM weightings in optimal solution",
+    axis = (
+        yticks = (1:2, ["Ethanol producing", "Acetate producing"]),
+        yticklabelrotation = pi / 2,
+        xticklabelrotation = pi / 2,
+        xlabel = "Parameters",
+        ylabel = "Control coefficient, param/λ * ∂λ/∂param",
+        xticks = (1:length(parameters), string.(parameters[sens_perm])),
+        title = "Control coefficients of OFM weightings in optimal solution",
         ylabelsize = 23,
         xlabelsize = 23,
         titlesize = 25,

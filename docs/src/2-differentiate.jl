@@ -25,7 +25,7 @@ include("../../test/simple_model.jl"); #hide
 
 model
 
-parameter_values = Dict{Symbol, Float64}()
+parameter_values = Dict{Symbol,Float64}()
 reaction_isozymes = Dict{String,Dict{String,X.IsozymeT{Ex}}}() # a mapping from reaction IDs to isozyme IDs to isozyme structs.
 float_reaction_isozymes = Dict{String,Dict{String,X.Isozyme}}() #src
 for rid in A.reactions(model)
@@ -79,7 +79,7 @@ ec_solution_fba = enzyme_constrained_flux_balance_analysis( #src
 
 @test isapprox(ec_solution.objective, ec_solution_fba.objective; atol = TEST_TOLERANCE) #src
 
-@test any(isapprox.(values(ec_solution.gene_product_amounts), 0, atol=1e-8)) #src
+@test any(isapprox.(values(ec_solution.gene_product_amounts), 0, atol = 1e-8)) #src
 
 # We have a solution that uses every reaction, and the enzyme capacities are both full.
 # Therefore, we may calculate the EFMs of this solution and directly differentiate
@@ -101,7 +101,7 @@ E = get_efms(Matrix(N))
 EFM_dict = Dict(A.reactions(model) .=> eachrow(E))
 EFMs = [
     Dict(k => v[1] / EFM_dict["r6"][1] for (k, v) in EFM_dict),
-    Dict(k => v[2] / EFM_dict["r6"][2] for (k, v) in EFM_dict)
+    Dict(k => v[2] / EFM_dict["r6"][2] for (k, v) in EFM_dict),
 ]
 
 @test EFM_dict == Dict(
@@ -125,7 +125,7 @@ M = [
 ]
 
 v = [
-    ec_solution.tree.fluxes["r1"];
+    ec_solution.tree.fluxes["r1"]
     ec_solution.tree.fluxes["r5"]
 ]
 
@@ -141,11 +141,21 @@ v = [
 
 parameters = Ex.(collect(keys(parameter_values)))
 p_vals = collect(values(parameter_values))
-rid_pid = Dict(rid => [iso.kcat_forward for (k, iso) in v][1] for (rid, v) in reaction_isozymes)
+rid_pid =
+    Dict(rid => [iso.kcat_forward for (k, iso) in v][1] for (rid, v) in reaction_isozymes)
 
-sens_efm = differentiate_efm(EFMs, parameters, rid_pid, parameter_values, rid_gcounts, capacity, gene_product_molar_masses, T.Optimizer)
+sens_efm = differentiate_efm(
+    EFMs,
+    parameters,
+    rid_pid,
+    parameter_values,
+    rid_gcounts,
+    capacity,
+    gene_product_molar_masses,
+    T.Optimizer,
+)
 
 @test sens_efm == [
-    2.5  -0.0   2.5
-    -0.0   5.0  -0.0
+    2.5 -0.0 2.5
+    -0.0 5.0 -0.0
 ] #src 

@@ -270,7 +270,7 @@ parameters[sens_perm]
 
 f, a, hm = heatmap(
     scaled_sens[:, sens_perm]';
-    colormap = Reverse(:RdBu),
+    colormap = CairoMakie.Reverse(:RdBu),
     axis = (
         yticks = (1:2, ["Ethanol producing", "Acetate producing"]),
         yticklabelrotation = pi / 2,

@@ -200,10 +200,18 @@ OFM_dicts = [
 OFM_dicts[1]["EX_etoh_e"]
 OFM_dicts[1]["EX_ac_e"]
 
+@test OFM_dicts[1]["EX_ac_e"] ≈ 0 #src 
+@test OFM_dicts[1]["EX_etoh_e"] > 1e-3 #src
+
+
 # And the second OFM is releasing acetate but no ethanol
 
 OFM_dicts[2]["EX_etoh_e"]
 OFM_dicts[2]["EX_ac_e"]
+
+@test OFM_dicts[2]["EX_etoh_e"] ≈ 0 #src
+@test OFM_dicts[2]["EX_ac_e"] > 1e-3 #src
+
 
 # ## Differentiate OFM usage
 

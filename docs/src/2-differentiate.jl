@@ -157,4 +157,5 @@ sens_efm = differentiate_efm(
 
 @test sens_efm == [ #src
     2.5 -0.0 2.5 #src
-    -0.0 5.0 -0.0] #src 
+    -0.0 5.0 -0.0 #src
+] #src 

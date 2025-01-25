@@ -102,10 +102,10 @@ EFMs = [
     Dict(k => v[2] / EFM_dict["r6"][2] for (k, v) in EFM_dict),
 ]
 
-@test isapprox(
-    collect(values(EFM_dict)),
-    collect(
-        values(
+@test isapprox( #src
+    collect(values(EFM_dict)), #src
+    collect( #src
+        values( #src
             Dict( #src
                 "r1" => [1.0, 0.0], #src
                 "r2" => [1.0, 1.0], #src

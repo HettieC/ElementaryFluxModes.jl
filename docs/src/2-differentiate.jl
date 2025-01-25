@@ -39,15 +39,15 @@ for rid in A.reactions(model)
 
         d = get!(reaction_isozymes, rid, Dict{String,X.IsozymeT{Ex}}())
         d["isozyme_$i"] = X.IsozymeT{Ex}(
-            gene_product_stoichiometry=Dict(grr .=> fill(float(1.0), size(grr))), # assume subunit stoichiometry of 1 for all isozymes
-            kcat_forward=Ex(Symbol(rid)),
-            kcat_reverse=0.0,
+            gene_product_stoichiometry = Dict(grr .=> fill(float(1.0), size(grr))), # assume subunit stoichiometry of 1 for all isozymes
+            kcat_forward = Ex(Symbol(rid)),
+            kcat_reverse = 0.0,
         )
         d2 = get!(float_reaction_isozymes, rid, Dict{String,X.Isozyme}()) #src
         d2["isozyme_$i"] = X.Isozyme( #src
-            gene_product_stoichiometry=Dict(grr .=> fill(1.0, size(grr))), #src
-            kcat_forward=kcat, #src
-            kcat_reverse=0.0, #src
+            gene_product_stoichiometry = Dict(grr .=> fill(1.0, size(grr))), #src
+            kcat_forward = kcat, #src
+            kcat_reverse = 0.0, #src
         ) #src
     end
 end
@@ -62,22 +62,22 @@ km = enzyme_constrained_flux_balance_constraints( # kinetic model
 ec_solution = D.optimized_values(
     km,
     parameter_values;
-    objective=km.objective.value,
-    optimizer=T.Optimizer,
-    settings=[X.set_optimizer_attribute("IPM_IterationsLimit", 10_000)],
+    objective = km.objective.value,
+    optimizer = T.Optimizer,
+    settings = [X.set_optimizer_attribute("IPM_IterationsLimit", 10_000)],
 )
 
 ec_solution.tree.fluxes
 
 ec_solution_fba = enzyme_constrained_flux_balance_analysis( #src
     model; #src
-    reaction_isozymes=float_reaction_isozymes, #src
+    reaction_isozymes = float_reaction_isozymes, #src
     gene_product_molar_masses, #src
     capacity, #src
-    optimizer=T.Optimizer, #src
+    optimizer = T.Optimizer, #src
 ) #src
 
-@test isapprox(ec_solution.tree.objective, ec_solution_fba.objective; atol=1e-8) #src
+@test isapprox(ec_solution.tree.objective, ec_solution_fba.objective; atol = 1e-8) #src
 
 # We have a solution that uses every reaction, and the enzyme capacities are both full.
 # Therefore, we may calculate the EFMs of this solution and directly differentiate
@@ -102,14 +102,20 @@ EFMs = [
     Dict(k => v[2] / EFM_dict["r6"][2] for (k, v) in EFM_dict),
 ]
 
-@test isapprox(collect(values(EFM_dict)), collect(values(Dict( #src
-    "r1" => [1.0, 0.0], #src
-    "r2" => [1.0, 1.0], #src
-    "r5" => [0.0, 1.0], #src
-    "r6" => [1.0, 1.0], #src
-    "r3" => [1.0, 0.0], #src
-    "r4" => [1.0, 0.0], #src
-))) #src
+@test isapprox(
+    collect(values(EFM_dict)),
+    collect(
+        values(
+            Dict( #src
+                "r1" => [1.0, 0.0], #src
+                "r2" => [1.0, 1.0], #src
+                "r5" => [0.0, 1.0], #src
+                "r6" => [1.0, 1.0], #src
+                "r3" => [1.0, 0.0], #src
+                "r4" => [1.0, 0.0], #src
+            ),
+        ),
+    ), #src
 ) #src
 
 # The optimal solution, **v**, can be written as λ₁**EFM₁**+λ₂**EFM₂**=**v**

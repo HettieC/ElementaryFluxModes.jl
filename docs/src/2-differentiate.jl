@@ -1,8 +1,8 @@
 # # Differentiating the EFMs of a toy model
 
-# The optimal flux distribution of any metabolic model can be written as a 
-# weighted sum of the EFMs of that model. We are interested in calculating 
-# the sensitivity of these weightings to the model parameters, and can use 
+# The optimal flux distribution of any metabolic model can be written as a
+# weighted sum of the EFMs of that model. We are interested in calculating
+# the sensitivity of these weightings to the model parameters, and can use
 # DifferentiableMetabolism.jl to efficiently do so.
 
 using ElementaryFluxModes
@@ -89,7 +89,7 @@ ec_solution_fba = enzyme_constrained_flux_balance_analysis( #src
 
 N = A.stoichiometry(model)
 
-# Calculate a flux matrix of the EFMs, the size of which is (n,k), for n reactions 
+# Calculate a flux matrix of the EFMs, the size of which is (n,k), for n reactions
 # and k EFMs
 
 E = get_efms(Matrix(N))
@@ -121,7 +121,7 @@ EFMs = [
 # The optimal solution, **v**, can be written as λ₁**EFM₁**+λ₂**EFM₂**=**v**
 # so that the λ give us the weightings of the two EFMs.
 
-# Let's calculate λ₁ and λ₂, using reactions `r1` and `r5`, as these are not 
+# Let's calculate λ₁ and λ₂, using reactions `r1` and `r5`, as these are not
 # shared by the EFMs
 
 M = [
@@ -141,7 +141,7 @@ v = [
 
 # ## Differentiate the EFMs
 
-# We have calculated the EFMs, and now wish to differentiate their weightings, 
+# We have calculated the EFMs, and now wish to differentiate their weightings,
 # `λ`, with respect to the model parameters
 
 parameters = Ex.(collect(keys(parameter_values)))
@@ -160,4 +160,4 @@ sens_efm = differentiate_efm(
     T.Optimizer,
 )
 
-@test isapprox(sens_efm, [2.5 -0.0 2.5; -0.0 5.0 -0.0]) #src 
+@test isapprox(sens_efm, [2.5 -0.0 2.5; -0.0 5.0 -0.0]) #src

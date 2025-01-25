@@ -14,10 +14,10 @@ using JSON
 import Tulip as T
 using CairoMakie
 
-# It has been proven that enzyme constrained models with K constraints 
+# It has been proven that enzyme constrained models with K constraints
 # will use a maximum of K EFMs in their optimal solution (de Groot 2019).
 
-# Here, we take the _E. coli_ core model with two enzyme constraints, find the optimal 
+# Here, we take the _E. coli_ core model with two enzyme constraints, find the optimal
 # solution, and then find the EFMs in the optimal solution.
 
 
@@ -74,16 +74,16 @@ ec_solution = X.enzyme_constrained_flux_balance_analysis(
 
 ec_solution
 
-# This solution is both producing acetate and consuming oxygen, therefore it looks like 
+# This solution is both producing acetate and consuming oxygen, therefore it looks like
 # overflow metabolism.
 
 ec_solution.fluxes["EX_ac_e"]
 ec_solution.fluxes["EX_o2_e"]
 
-# Since we had two enzyme pools, the membrane and the cytosol, this optimal 
-# solution will be composed of at most two EFMs. In order to find out how 
-# small parameter changes will affect this optimal composition, we must first 
-# remove inactive reactions, so that the optimal solution is a unique 
+# Since we had two enzyme pools, the membrane and the cytosol, this optimal
+# solution will be composed of at most two EFMs. In order to find out how
+# small parameter changes will affect this optimal composition, we must first
+# remove inactive reactions, so that the optimal solution is a unique
 # superposition of the two EFMs, and we can differentiate it.
 
 # This solution contains many inactive reactions
@@ -91,7 +91,7 @@ sort(collect(ec_solution.fluxes), by = ComposedFunction(abs, last))
 
 @test any(values(ec_solution.fluxes) .≈ 0) #src
 
-# And also many inactive gene products. 
+# And also many inactive gene products.
 
 sort(collect(ec_solution.gene_product_amounts), by = last)
 
@@ -112,7 +112,7 @@ pruned_model, pruned_reaction_isozymes = D.prune_model(
     gene_zero_tol,
 )
 
-# Since we will later be differentiating our solution, we need to make 
+# Since we will later be differentiating our solution, we need to make
 # parameter isozymes and a kinetic model
 
 parameter_values = Dict(
@@ -161,12 +161,12 @@ sort(abs.(collect(values(pruned_solution.tree.gene_product_amounts))))
 pruned_model.reactions["ATPM"].lower_bound
 
 # As a result of this fixed flux, standard EFM theory does not hold. Instead,
-# we investigate the optimal flux modes (OFMs). These are the flux modes 
-# that are able to produce the optimal rate of the objective, whilst still 
+# we investigate the optimal flux modes (OFMs). These are the flux modes
+# that are able to produce the optimal rate of the objective, whilst still
 # being constrained to the fixed ATPM.
 
-# To find the OFMs, we must augment the stoichiometric matrix, and can then 
-# use the same `find_efms` function, since this augmented matrix behaves 
+# To find the OFMs, we must augment the stoichiometric matrix, and can then
+# use the same `find_efms` function, since this augmented matrix behaves
 # as required for the algorithm to work.
 
 N = A.stoichiometry(pruned_model)
@@ -201,7 +201,7 @@ OFM_dicts = [
 # OFM_dicts[1]["EX_etoh_e"]
 # OFM_dicts[1]["EX_ac_e"]
 
-# @test OFM_dicts[1]["EX_ac_e"] ≈ 0 #src 
+# @test OFM_dicts[1]["EX_ac_e"] ≈ 0 #src
 # @test OFM_dicts[1]["EX_etoh_e"] > 1e-3 #src
 
 

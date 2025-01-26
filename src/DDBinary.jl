@@ -52,7 +52,6 @@ $(TYPEDSIGNATURES)
 Calculate the optimal flux modes of a pruned optimal solution.
 TODO: make work for more than two fixed fluxes
 """
-
 function get_ofms(
     N::Matrix{Float64},
     fixed_fluxes::Vector{Int},

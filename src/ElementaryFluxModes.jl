@@ -9,15 +9,15 @@ using LinearAlgebra
 using RowEchelon
 using SparseArrays
 using DocStringExtensions
+using JuMP
+using FastDifferentiation
 
 include("utils.jl")
-export reorder_ns
-export rational_nullspace
-export make_all_irreversible
-
 include("DDBinary.jl")
 export DDBinary
 export get_efms
 export get_ofms
+include("differentiate_efm.jl")
+export differentiate_efm
 
 end

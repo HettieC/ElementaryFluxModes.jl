@@ -1,18 +1,17 @@
 
 # Reference
 
-## Standard DD
-
-```@autodocs
-Modules = [ElementaryFluxModes]
-Pages = ["src/DDStandard.jl"]
-```
-
 ## Binary DD
 
 ```@autodocs
 Modules = [ElementaryFluxModes]
 Pages = ["src/DDBinary.jl"]
+```
+
+## Differenting
+```@autodocs
+Modules = [ElementaryFluxModes]
+Pages = ["src/differentiate_efm.jl"]
 ```
 
 ## Utilities

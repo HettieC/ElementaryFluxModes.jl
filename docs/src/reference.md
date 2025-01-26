@@ -8,7 +8,7 @@ Modules = [ElementaryFluxModes]
 Pages = ["src/DDBinary.jl"]
 ```
 
-## Differenting
+## Differentiating
 ```@autodocs
 Modules = [ElementaryFluxModes]
 Pages = ["src/differentiate_efm.jl"]

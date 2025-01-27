@@ -4,7 +4,7 @@ $(TYPEDSIGNATURES)
 Calculate elementary flux modes of a stoichiometric matrix.
 Input:
 `N`: the stoichiometric matrix of a network with only forward reactions.
-Output: 
+Output:
 matrix of the EFMs, each column is a different EFM, rows correspond to the reaction indices of the input `N`.
 """
 function get_efms(N::Matrix{Float64}; tol = 1e-15)
@@ -51,8 +51,8 @@ end
 $(TYPEDSIGNATURES)
 Calculate the optimal flux modes of a pruned optimal solution.
 Arguments:
-- `N`: the stoichiometric matrix of a pruned model 
-- `fixed_fluxes`: the indexes of the fixed fluxes 
+- `N`: the stoichiometric matrix of a pruned model
+- `fixed_fluxes`: the indexes of the fixed fluxes
 - `flux_values`: the optimal values of the fixed fluxes
 Output: matrix of the OFMs, each column is a different OFM, rows correspond to the reaction indices of the input `N`.
 """

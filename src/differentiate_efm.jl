@@ -10,16 +10,23 @@ following LP:
 where D is the cost matrix associated to each EFM in each enzyme pool.
 We then differentiate Lagrangian of this LP to calculate the differential of x by parameters.
 
-Variables:
-- 'D_matrix': the matrix of cost vectors, and must be inputted as a function of the parameters
+Arguments:
+- 'EFMs': a vector of dictionaries of EFMs
 - 'parameters': vector of the model parameters
+- `rid_pid`: dict of reaction ids => parameter ids
+- `parameter_values`: dict of parameter symbol => float value
+- `rid_gcounts`: dict of reaction id => gene product counts
+- `capacity`: enzyme capacity limit of the enzyme constrained model
+- `gene_product_molar_masses`: dict of gene product gene_product_molar_masses
+Output:
+Matrix Aᵢⱼ of the the differential of EFM i with respect to parameter j: d(EFMᵢ)/d(pⱼ)
 """
 function differentiate_efm(
     EFMs::Vector{Dict{String,Float64}},
-    parameters,
-    rid_pid,
-    parameter_values,
-    rid_gcounts,
+    parameters::Vector{FastDifferentiation.Node},
+    rid_pid::Dict{String,FastDifferentiation.Node},
+    parameter_values::Dict{Symbol,Float64},
+    rid_gcounts::Dict{String,Dict{String,Float64}},
     capacity::Vector{Tuple{String,Vector{String},Float64}},
     gene_product_molar_masses::Dict{String,Float64},
     optimizer,
@@ -89,12 +96,7 @@ Cost is calculated as ∑w(i)V(j)/kcat, where the variables are:
 - 'w(i)': fraction of the ith enzyme pool that one mole of the enzyme uses up
 - 'V(j)': flux through the reaction in EFM j
 - 'kcat': turnover number of the enzyme.
-
-Inputted function variables are:
-- 'efms': list of the fluxes through the EFMs, each given as a dictionary of reaction_id => [flux efm1, flux efm2, ...]
-- 'parameters': parameters of the LP, the turnover numbers
 """
-
 function _cost_matrix(
     EFMs::Vector{Dict{String,Float64}},
     rid_pid,
@@ -133,3 +135,23 @@ function _cost_matrix(
     end
     return D
 end
+
+differentiate_ofm(
+    EFMs::Vector{Dict{String,Float64}},
+    parameters::Vector{FastDifferentiation.Node},
+    rid_pid::Dict{String,FastDifferentiation.Node},
+    parameter_values::Dict{Symbol,Float64},
+    rid_gcounts::Dict{String,Dict{String,Float64}},
+    capacity::Vector{Tuple{String,Vector{String},Float64}},
+    gene_product_molar_masses::Dict{String,Float64},
+    optimizer,
+) = differentiate_efm(
+    EFMs,
+    parameters,
+    rid_pid,
+    parameter_values,
+    rid_gcounts,
+    capacity,
+    gene_product_molar_masses,
+    optimizer,
+)

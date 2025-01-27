@@ -1,4 +1,4 @@
-# # _E. coli_ core model
+# # Sensitivities of OFMs in _E. coli_ core
 
 using ElementaryFluxModes
 

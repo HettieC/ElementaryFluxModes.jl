@@ -1,4 +1,4 @@
-# # Differentiating the EFMs of a toy model
+# # Sensitivities of the EFMs of a toy model
 
 # The optimal flux distribution of any metabolic model can be written as a
 # weighted sum of the EFMs of that model. We are interested in calculating

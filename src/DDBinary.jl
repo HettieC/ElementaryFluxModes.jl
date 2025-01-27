@@ -2,10 +2,10 @@
 $(TYPEDSIGNATURES)
 
 Calculate elementary flux modes of a stoichiometric matrix.
-Input `N` must be the stoichiometric matrix of a network with only
-forward reactions.
-Output: vector of size (n,k) of the fluxes through the n reactions
-in the k EFMs.
+Input:
+`N`: the stoichiometric matrix of a network with only forward reactions.
+Output:
+matrix of the EFMs, each column is a different EFM, rows correspond to the reaction indices of the input `N`.
 """
 function get_efms(N::Matrix{Float64}; tol = 1e-15)
     N = remove_linearly_dep_rows_qr(N)
@@ -50,7 +50,11 @@ end
 """
 $(TYPEDSIGNATURES)
 Calculate the optimal flux modes of a pruned optimal solution.
-TODO: make work for more than two fixed fluxes
+Arguments:
+- `N`: the stoichiometric matrix of a pruned model
+- `fixed_fluxes`: the indexes of the fixed fluxes
+- `flux_values`: the optimal values of the fixed fluxes
+Output: matrix of the OFMs, each column is a different OFM, rows correspond to the reaction indices of the input `N`.
 """
 function get_ofms(
     N::Matrix{Float64},
@@ -61,12 +65,11 @@ function get_ofms(
         error(
             "Length of fixed fluxes ($(length(fixed_fluxes)) does not match length of flux values ($(length(flux_values)))",
         )
-    elseif length(fixed_fluxes) > 2
-        error("Please follow steps manually to put the fluxes in the right order.")
     end
     fixed_order = sortperm(fixed_fluxes)
     fixed_fluxes = fixed_fluxes[fixed_order]
     flux_values = flux_values[fixed_order]
+    remaining_rxn_idxs = setdiff(1:size(N, 2), fixed_fluxes)
     N = remove_linearly_dep_rows_qr(N)
     N1 = N[:, setdiff(1:size(N, 2), fixed_fluxes)]
     N2 = N[:, fixed_fluxes]
@@ -99,7 +102,7 @@ function get_ofms(
     E = Matrix(undef, size(R, 1), size(R, 2))
     for (i, r) in enumerate(eachcol(R))
         non_zero = findall(x -> x != 0, r)
-        flux_ns = rational_nullspace(N[:, non_zero]; tol = 1e-14)[1]
+        flux_ns = ElementaryFluxModes.rational_nullspace(N[:, non_zero]; tol = 1e-14)[1]
         mode = zeros(size(R, 1))
         for (j, x) in zip(non_zero, flux_ns)
             mode[j] = abs(x) < 1e-14 ? 0 : x
@@ -108,14 +111,11 @@ function get_ofms(
     end
     # put back into original order
     E = E[invperm(order), :]
-    E = E ./ E[end]
+    E = E ./ E[end, :]'
 
     # put the fixed fluxes back in the right order
-    new_E = E[1:fixed_fluxes[1]-1, :]
-    new_E = vcat(new_E, E[end, :]' * flux_values[1])
-    new_E = vcat(new_E, E[fixed_fluxes[1]:fixed_fluxes[2]-2, :])
-    new_E = vcat(new_E, E[end, :]' * flux_values[2])
-    new_E = vcat(new_E, E[fixed_fluxes[2]-1:end-1, :])
+    new_order = sortperm(vcat(remaining_rxn_idxs, fixed_fluxes...))
+    new_E = vcat(E[1:end-1, :], (E[end, :] * flux_values')')[new_order, :]
 
     return new_E
 end
@@ -125,13 +125,10 @@ $(TYPEDSIGNATURES)
 
 Implement the Double Description method in binary form.
 The input variables are:
--N: the stoichiometric matrix with only forward reactions. If any fluxes are fixed
-    then N has the form [N1 w] where N1 is the stoichiometric matrix for non-fixed fluxes,
-    and w is the columns of fixed fluxes multiplied by their flux values.
-
--K: initial nullspace of N, in the form [I;K*]
+-`N`: the stoichiometric matrix with only forward reactions. If any fluxes are fixed then N has the form [N1 w] where N1 is the stoichiometric matrix for non-fixed fluxes, and w is the columns of fixed fluxes multiplied by their flux values.
+-`K`: initial nullspace of N, in the form [I;K*]
 Output:
--R: binary elementary flux modes
+-`R`: binary elementary flux modes
 """
 function DDBinary(N, K)
     R_binary = Matrix(I(size(K, 2)))

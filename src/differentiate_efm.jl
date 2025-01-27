@@ -11,15 +11,15 @@ where D is the cost matrix associated to each EFM in each enzyme pool.
 We then differentiate Lagrangian of this LP to calculate the differential of x by parameters.
 
 Arguments:
-- 'EFMs': a vector of dictionaries of EFMs 
+- 'EFMs': a vector of dictionaries of EFMs
 - 'parameters': vector of the model parameters
-- `rid_pid`: dict of reaction ids => parameter ids 
-- `parameter_values`: dict of parameter symbol => float value 
+- `rid_pid`: dict of reaction ids => parameter ids
+- `parameter_values`: dict of parameter symbol => float value
 - `rid_gcounts`: dict of reaction id => gene product counts
-- `capacity`: enzyme capacity limit of the enzyme constrained model 
+- `capacity`: enzyme capacity limit of the enzyme constrained model
 - `gene_product_molar_masses`: dict of gene product gene_product_molar_masses
 Output:
-Matrix Aᵢⱼ of the the differential of EFM i with respect to parameter j: d(EFMᵢ)/d(pⱼ) 
+Matrix Aᵢⱼ of the the differential of EFM i with respect to parameter j: d(EFMᵢ)/d(pⱼ)
 """
 function differentiate_efm(
     EFMs::Vector{Dict{String,Float64}},

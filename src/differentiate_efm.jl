@@ -26,7 +26,7 @@ function differentiate_efm(
     parameters::Vector{FastDifferentiation.Node},
     rid_pid::Dict{String,FastDifferentiation.Node},
     parameter_values::Dict{Symbol,Float64},
-    rid_gcounts::Dict{String, Dict{String, Float64}},
+    rid_gcounts::Dict{String,Dict{String,Float64}},
     capacity::Vector{Tuple{String,Vector{String},Float64}},
     gene_product_molar_masses::Dict{String,Float64},
     optimizer,
@@ -135,3 +135,23 @@ function _cost_matrix(
     end
     return D
 end
+
+differentiate_ofm(
+    EFMs::Vector{Dict{String,Float64}},
+    parameters::Vector{FastDifferentiation.Node},
+    rid_pid::Dict{String,FastDifferentiation.Node},
+    parameter_values::Dict{Symbol,Float64},
+    rid_gcounts::Dict{String,Dict{String,Float64}},
+    capacity::Vector{Tuple{String,Vector{String},Float64}},
+    gene_product_molar_masses::Dict{String,Float64},
+    optimizer,
+) = differentiate_efm(
+    EFMs,
+    parameters,
+    rid_pid,
+    parameter_values,
+    rid_gcounts,
+    capacity,
+    gene_product_molar_masses,
+    optimizer,
+)

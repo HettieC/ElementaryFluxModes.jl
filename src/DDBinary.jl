@@ -111,11 +111,11 @@ function get_ofms(
     end
     # put back into original order
     E = E[invperm(order), :]
-    E = E ./ E[end,:]'
+    E = E ./ E[end, :]'
 
     # put the fixed fluxes back in the right order
-    new_order = sortperm(vcat(remaining_rxn_idxs,fixed_fluxes...))
-    new_E = vcat(E[1:end-1,:],(E[end,:]*flux_values')')[new_order,:]
+    new_order = sortperm(vcat(remaining_rxn_idxs, fixed_fluxes...))
+    new_E = vcat(E[1:end-1, :], (E[end, :] * flux_values')')[new_order, :]
 
     return new_E
 end

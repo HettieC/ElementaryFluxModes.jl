@@ -25,6 +25,8 @@ For more information, please see the documentation.
 
 This package is maintained and open for extensions. Please feel free to discuss and suggest changes or ideas via pull requests.
 
-### Acknowledgements
+#### Acknowledgements
+
 `ElementaryFluxModes.jl` was developed at the Institute for Quantitative and Theoretical Biology at Heinrich Heine University Düsseldorf (qtb.hhu.de), and at the Luxembourg Centre for Systems Biomedicine of the University of Luxembourg (uni.lu/lcsb).
+
 <img src="docs/src/assets/hhu.svg" alt="HHU logo" height="64px" style="height:64px; width:auto">   <img src="docs/src/assets/qtb.svg" alt="QTB logo" height="64px" style="height:64px; width:auto">   <img src="docs/src/assets/unilu.svg" alt="Uni.lu logo" height="64px">   <img src="docs/src/assets/lcsb.svg" alt="LCSB logo" height="64px">

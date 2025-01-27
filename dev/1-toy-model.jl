@@ -1,7 +1,8 @@
-# # Toy Model
+# # Calculating EFMs in a toy model
 
 using ElementaryFluxModes
 
+using AbstractFBCModels
 using LinearAlgebra
 
 # ## Load a simple model

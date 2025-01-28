@@ -2,8 +2,7 @@
 
 using ElementaryFluxModes
 
-using AbstractFBCModels
-using LinearAlgebra
+import AbstractFBCModels as A
 
 # ## Load a simple model
 
@@ -17,7 +16,7 @@ model
 
 # Get the stoichiometric matrix of the model, this is what we use to find EFMs
 
-N = AbstractFBCModels.stoichiometry(model)
+N = A.stoichiometry(model)
 
 # ## Calculate the EFMs
 
@@ -28,4 +27,4 @@ E = get_efms(Matrix(N))
 # If preferred, we can transform the vector of EFMs, **`E`**, into a dictionary
 # of reaction => fluxes through the efms
 
-EFM_dict = Dict(AbstractFBCModels.reactions(model) .=> eachrow(E))
+EFM_dict = Dict(A.reactions(model) .=> eachrow(E))

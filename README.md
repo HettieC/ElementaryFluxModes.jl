@@ -1,9 +1,20 @@
 # ElementaryFluxModes
 
-| Build status | Documentation |
-|:---:|:---:|
-|[![CI](https://github.com/HettieC/ElementaryFluxModes.jl/actions/workflows/ci.yml/badge.svg)](https://github.com/HettieC/ElementaryFluxModes.jl/actions/workflows/ci.yml) | [![stable documentation](https://img.shields.io/badge/docs-stable-blue)](https://hettiec.github.io/ElementaryFluxModes.jl/stable) [![dev documentation](https://img.shields.io/badge/docs-dev-cyan)](https://hettiec.github.io/ElementaryFluxModes.jl/dev) | [![cov]([![codecov](https://codecov.io/github/HettieC/ElementaryFluxModes.jl/branch/main/graph/badge.svg?token=R9FSE2HZPU)]([https://codecov.io/github/HettieC/ElementaryFluxModes.jl](https://codecov.io/github/HettieC/ElementaryFluxModes.jl)))](https://github.com/hettiec/ElementaryFluxModes/actions) |
+[docs-img-stable]: https://img.shields.io/badge/docs-stable-blue
+[docs-url-stable]: https://hettiec.github.io/ElementaryFluxModes.jl/stable
 
+[docs-img-dev]: https://img.shields.io/badge/docs-dev-cyan
+[docs-url-dev]: https://hettiec.github.io/ElementaryFluxModes.jl/dev
+
+[ci-img]: https://github.com/HettieC/ElementaryFluxModes.jl/actions/workflows/ci.yml/badge.svg
+[ci-url]: https://github.com/HettieC/ElementaryFluxModes.jl/actions/workflows/ci.yml
+
+[cov-img]: https://codecov.io/github/HettieC/ElementaryFluxModes.jl/branch/main/graph/badge.svg?token=R9FSE2HZPU
+[cov-url]: https://codecov.io/github/HettieC/ElementaryFluxModes.jl
+
+| **Documentation** | **Tests** | **Coverage** |
+|:---:|:---:|:---:|:---:|
+| [![docs-img-stable]][docs-url-stable] [![docs-img-dev]][docs-url-dev] | [![CI status][ci-img]][ci-url] | [![codecov][cov-img]][cov-url] | 
 
 This package provides a Julia implementation of the double description algorithm for enumerating elementary flux modes, and can algebraically differentiate the optimal use of these modes to calculate sensitivities.
 

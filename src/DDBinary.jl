@@ -11,17 +11,19 @@ function get_efms(N::Matrix{Float64}; tol = 1e-15)
     N = remove_linearly_dep_rows_qr(N)
     K = rational_nullspace(Matrix(N))[1]
     # Permute the rows of `K` to be in the form `[I;K*]`
-    order = Int64[]
-    rows_done = 1
-    for (i, row) in enumerate(eachrow(K))
-        rows_done > size(K, 2) && break
-        if row == Matrix(I(size(K, 2)))[rows_done, :]
-            push!(order, i)
-            rows_done += 1
-        end
-    end
-    append!(order, [i for i = 1:size(K, 1) if i ∉ order])
-    K = K[order, :]
+    K, order = reorder_ns(K)
+
+    # order = Int64[]
+    # rows_done = 1
+    # for (i, row) in enumerate(eachrow(K))
+    #     rows_done > size(K, 2) && break
+    #     if row == Matrix(I(size(K, 2)))[rows_done, :]
+    #         push!(order, i)
+    #         rows_done += 1
+    #     end
+    # end
+    # append!(order, [i for i = 1:size(K, 1) if i ∉ order])
+    # K = K[order, :]
 
     # The reaction order of `N` must match that of `K`
     N = N[:, order]
@@ -78,17 +80,18 @@ function get_ofms(
 
     K = rational_nullspace(Matrix(N))[1]
     # Permute the rows of `K` to be in the form `[I;K*]`
-    order = Int64[]
-    rows_done = 1
-    for (i, row) in enumerate(eachrow(K))
-        rows_done > size(K, 2) && break
-        if row == Matrix(I(size(K, 2)))[rows_done, :]
-            push!(order, i)
-            rows_done += 1
-        end
-    end
-    append!(order, [i for i = 1:size(K, 1) if i ∉ order])
-    K = K[order, :]
+    K, order = reorder_ns(K)
+    # order = Int64[]
+    # rows_done = 1
+    # for (i, row) in enumerate(eachrow(K))
+    #     rows_done > size(K, 2) && break
+    #     if row == Matrix(I(size(K, 2)))[rows_done, :]
+    #         push!(order, i)
+    #         rows_done += 1
+    #     end
+    # end
+    # append!(order, [i for i = 1:size(K, 1) if i ∉ order])
+    # K = K[order, :]
 
     # The reaction order of `N` must match that of `K`
     N = N[:, order]

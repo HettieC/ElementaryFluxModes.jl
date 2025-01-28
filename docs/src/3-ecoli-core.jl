@@ -204,7 +204,6 @@ OFM_dicts[1]["EX_ac_e"]
 @test OFM_dicts[1]["EX_ac_e"] ≈ 0 #src
 @test OFM_dicts[1]["EX_etoh_e"] > 1e-3 #src
 
-
 # And the second OFM is releasing acetate but no ethanol
 
 OFM_dicts[2]["EX_etoh_e"]
@@ -245,7 +244,7 @@ rid_gcounts = Dict(
 )
 rid_pid =
     Dict(rid => [iso.kcat_forward for (k, iso) in v][1] for (rid, v) in parameter_isozymes)
-sens = differentiate_efm(
+sens = differentiate_ofm(
     OFM_dicts,
     parameters,
     rid_pid,
@@ -268,6 +267,9 @@ end
 sens_perm = sortperm(scaled_sens[1, :])
 scaled_sens[:, sens_perm]
 parameters[sens_perm]
+
+@test scaled_sens[:,1] ≈ [0.0011918020116688521,-0.0030478076348665565]
+@test scaled_sens[:,33] ≈ [ 0.1264599684926767,-0.32339738790779676]
 
 f, a, hm = heatmap(
     scaled_sens[:, sens_perm]';

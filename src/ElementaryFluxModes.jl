@@ -23,5 +23,6 @@ export get_efms
 export get_ofms
 include("differentiate_efm.jl")
 export differentiate_efm
+export differentiate_ofm
 
 end

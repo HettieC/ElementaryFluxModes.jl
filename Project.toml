@@ -14,17 +14,30 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [compat]
 AbstractFBCModels = "1"
+COBREXA = "2.7"
+CairoMakie = "0.13"
+ConstraintTrees = "1"
+DifferentiableMetabolism = "0.2"
 DocStringExtensions = "0.9"
-FastDifferentiation = "0.4.3"
-JuMP = "1.23.6"
+FastDifferentiation = "0.4"
+JSON = "0.21"
+JSONFBCModels = "1"
+JuMP = "1"
 RowEchelon = "0.2"
 SparseArrays = "1"
-Test = "1.11.0"
 julia = "1"
 
 [extras]
 AbstractFBCModels = "5a4f3dfa-1789-40f8-8221-69268c29937c"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+COBREXA = "babc4406-5200-4a30-9033-bf5ae714c842"
+CairoMakie = "13f3f980-e62b-5c42-98c6-ff1f3baf88f0"
+ConstraintTrees = "5515826b-29c3-47a5-8849-8513ac836620"
+DifferentiableMetabolism = "9677e053-0fc1-49e6-98a8-2ad3a1525e54"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+JSONFBCModels = "475c1105-d6ed-49c1-9b32-c11adca6d3e8"
+Tulip = "6dd1b50a-3aae-11e9-10b5-ef983d2400fa"
+
 
 [targets]
 test = ["AbstractFBCModels", "Test"]

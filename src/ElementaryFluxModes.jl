@@ -13,6 +13,7 @@ using LinearAlgebra
 using SparseArrays
 using DocStringExtensions
 using JuMP
+using RowEchelon
 using FastDifferentiation
 
 include("utils.jl")

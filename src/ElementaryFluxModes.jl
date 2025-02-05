@@ -10,7 +10,6 @@ It is also possible to use differentiation to calculate the sensitivity of the o
 module ElementaryFluxModes
 
 using LinearAlgebra
-using RowEchelon
 using SparseArrays
 using DocStringExtensions
 using JuMP

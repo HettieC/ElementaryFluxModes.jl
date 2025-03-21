@@ -93,7 +93,8 @@ OFMs = get_ofms(Matrix(N), fixed_fluxes, flux_values)
 ]#src
 
 OFM_dicts = [
-    Dict(A.reactions(model) .=> OFMs[:, 1]), Dict(A.reactions(model) .=> OFMs[:, 2])
+    Dict(A.reactions(model) .=> OFMs[:, 1]), 
+    Dict(A.reactions(model) .=> OFMs[:, 2])
 ]
 
 # We see that the first OFM uses reactions 1,2,3,4,6 and ATPM, and the second OFM uses reactions 2,5,6 and ATPM.

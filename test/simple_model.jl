@@ -16,6 +16,12 @@ rs = [
         stoichiometry = Dict("m2" => 1),
     )
     AC.Reaction(;
+    name = "ATPM",
+    lower_bound = 0,
+    upper_bound = 1000,
+    stoichiometry = Dict("m4" => -1),
+)
+    AC.Reaction(;
         name = "r3",
         lower_bound = 0,
         upper_bound = 1000,

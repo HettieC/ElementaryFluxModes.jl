@@ -69,7 +69,7 @@ ec_solution = D.optimized_values(
 
 ec_solution.tree.fluxes
 
-# We see that the reaction ATPM is not used in the optimal solution, so we remove this reaction from the model. 
+# We see that the reaction ATPM is not used in the optimal solution, so we remove this reaction from the model.
 
 ec_solution_fba = enzyme_constrained_flux_balance_analysis( #src
     model; #src

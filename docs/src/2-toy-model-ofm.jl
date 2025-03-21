@@ -61,7 +61,7 @@ ec_solution.fluxes
 @test all(values(ec_solution.fluxes) .> 1e-5) #src
 
 
-# This optimal solution uses every reaction in the model, and since we have an enzyme capacity with two enzyme pools, theory has shown that there must be two OFMs in this optimal solution, and the optimal proportion of their flux is unique. 
+# This optimal solution uses every reaction in the model, and since we have an enzyme capacity with two enzyme pools, theory has shown that there must be two OFMs in this optimal solution, and the optimal proportion of their flux is unique.
 
 # To calculate these OFMs, we require the index and optimal value of ATPM and the objective reaction r6
 
@@ -107,7 +107,7 @@ OFM_dicts = [
     Dict(x => y / OFM_dicts[2]["r6"] for (x, y) in OFM_dicts[2]),
 ]
 
-# Calculate proportion of the OFMs used in the optimal solution 
+# Calculate proportion of the OFMs used in the optimal solution
 
 M = [
     OFM_dicts[1]["r5"] OFM_dicts[2]["r5"]
@@ -124,7 +124,7 @@ v = [
 @test λ ≈ [173.33333332 86.66666666]'
 # Two thirds of the optimal flux is provided by the first OFM (using r2 and r3), and the remaining third by the second OFM (using r4).
 
-# ## Differentiate the OFM usage  
+# ## Differentiate the OFM usage
 
 # It remains to differentiate to find the sensitivities of the OFM usage to the model parameters. For this, we must set up parameter isozymes.
 

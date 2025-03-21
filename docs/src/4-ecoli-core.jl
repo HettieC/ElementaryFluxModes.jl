@@ -46,9 +46,9 @@ for (rid, rxn) in model.reactions
 
         d = get!(float_reaction_isozymes, rid, Dict{String,X.Isozyme}())
         d["isozyme_$i"] = X.Isozyme(
-            gene_product_stoichiometry=Dict(grr .=> fill(1.0, size(grr))), # assume subunit stoichiometry of 1 for all isozymes
-            kcat_forward=kcat, # assume forward and reverse have the same kcat
-            kcat_reverse=kcat,
+            gene_product_stoichiometry = Dict(grr .=> fill(1.0, size(grr))), # assume subunit stoichiometry of 1 for all isozymes
+            kcat_forward = kcat, # assume forward and reverse have the same kcat
+            kcat_reverse = kcat,
         )
     end
 end
@@ -66,10 +66,10 @@ capacity = [
 
 ec_solution = X.enzyme_constrained_flux_balance_analysis(
     model;
-    reaction_isozymes=float_reaction_isozymes,
+    reaction_isozymes = float_reaction_isozymes,
     gene_product_molar_masses,
     capacity,
-    optimizer=T.Optimizer,
+    optimizer = T.Optimizer,
 )
 
 ec_solution
@@ -87,15 +87,15 @@ ec_solution.fluxes["EX_o2_e"]
 # superposition of the two EFMs, and we can differentiate it.
 
 # This solution contains many inactive reactions
-sort(collect(ec_solution.fluxes), by=ComposedFunction(abs, last))
+sort(collect(ec_solution.fluxes), by = ComposedFunction(abs, last))
 
 @test any(values(ec_solution.fluxes) .≈ 0) #src
 
 # And also many inactive gene products.
 
-sort(collect(ec_solution.gene_product_amounts), by=last)
+sort(collect(ec_solution.gene_product_amounts), by = last)
 
-@test any(isapprox.(values(ec_solution.gene_product_amounts), 0, atol=1e-8)) #src
+@test any(isapprox.(values(ec_solution.gene_product_amounts), 0, atol = 1e-8)) #src
 
 # Let us start by pruning the model.
 
@@ -132,7 +132,7 @@ parameter_isozymes = Dict(
 
 pkm = X.enzyme_constrained_flux_balance_constraints( # kinetic model
     pruned_model;
-    reaction_isozymes=parameter_isozymes,
+    reaction_isozymes = parameter_isozymes,
     gene_product_molar_masses,
     capacity,
 )
@@ -140,13 +140,13 @@ pkm = X.enzyme_constrained_flux_balance_constraints( # kinetic model
 pruned_solution = D.optimized_values(
     pkm,
     parameter_values;
-    objective=pkm.objective.value,
-    optimizer=T.Optimizer,
+    objective = pkm.objective.value,
+    optimizer = T.Optimizer,
 )
 
 # All reactions with zero flux have been removed in the pruned model
 
-sort(collect(pruned_solution.tree.fluxes), by=ComposedFunction(abs, last))
+sort(collect(pruned_solution.tree.fluxes), by = ComposedFunction(abs, last))
 
 # Genes with zero concentration have also been removed.
 
@@ -201,7 +201,8 @@ OFM_dicts = [
 OFM_dicts[1]["EX_etoh_e"]
 OFM_dicts[1]["EX_ac_e"]
 
-@test (OFM_dicts[1]["EX_ac_e"] ≈ 0 && OFM_dicts[1]["EX_etoh_e"] > 1e-3) || (OFM_dicts[2]["EX_ac_e"] ≈ 0 && OFM_dicts[2]["EX_etoh_e"] > 1e-3) #src
+@test (OFM_dicts[1]["EX_ac_e"] ≈ 0 && OFM_dicts[1]["EX_etoh_e"] > 1e-3) ||
+      (OFM_dicts[2]["EX_ac_e"] ≈ 0 && OFM_dicts[2]["EX_etoh_e"] > 1e-3) #src
 
 OFM_dicts[2]["EX_etoh_e"]
 OFM_dicts[2]["EX_ac_e"]
@@ -262,23 +263,25 @@ sens_perm = sortperm(scaled_sens[1, :])
 scaled_sens[:, sens_perm]
 parameters[sens_perm]
 
-@test scaled_sens[:, 1] ≈ [0.0011918020116688521, -0.0030478076348665565] || scaled_sens[:, 1] ≈ [-0.0030478076348665565, 0.0011918020116688521] #src
-@test scaled_sens[:, 33] ≈ [0.1264599684926767, -0.32339738790779676] || scaled_sens[:, 33] ≈ [-0.32339738790779676, 0.1264599684926767] #src
+@test scaled_sens[:, 1] ≈ [0.0011918020116688521, -0.0030478076348665565] ||
+      scaled_sens[:, 1] ≈ [-0.0030478076348665565, 0.0011918020116688521] #src
+@test scaled_sens[:, 33] ≈ [0.1264599684926767, -0.32339738790779676] ||
+      scaled_sens[:, 33] ≈ [-0.32339738790779676, 0.1264599684926767] #src
 
 f, a, hm = heatmap(
     scaled_sens[:, sens_perm]';
-    colormap=CairoMakie.Reverse(:RdBu),
-    axis=(
-        yticks=(1:2, ["Ethanol producing", "Acetate producing"]),
-        yticklabelrotation=pi / 2,
-        xticklabelrotation=pi / 2,
-        xlabel="Parameters",
-        ylabel="Control coefficient, param/λ * ∂λ/∂param",
-        xticks=(1:length(parameters), string.(parameters[sens_perm])),
-        title="Control coefficients of OFM weightings in optimal solution",
-        ylabelsize=23,
-        xlabelsize=23,
-        titlesize=25,
+    colormap = CairoMakie.Reverse(:RdBu),
+    axis = (
+        yticks = (1:2, ["Ethanol producing", "Acetate producing"]),
+        yticklabelrotation = pi / 2,
+        xticklabelrotation = pi / 2,
+        xlabel = "Parameters",
+        ylabel = "Control coefficient, param/λ * ∂λ/∂param",
+        xticks = (1:length(parameters), string.(parameters[sens_perm])),
+        title = "Control coefficients of OFM weightings in optimal solution",
+        ylabelsize = 23,
+        xlabelsize = 23,
+        titlesize = 25,
     ),
 );
 Colorbar(f[:, end+1], hm)

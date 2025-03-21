@@ -35,9 +35,9 @@ for (rid, rxn) in model.reactions
 
         d = get!(float_reaction_isozymes, rid, Dict{String,X.Isozyme}())
         d["$(rid)_$i"] = X.Isozyme(
-            gene_product_stoichiometry=Dict(grr .=> fill(1.0, size(grr))), # assume subunit stoichiometry of 1 for all isozymes
-            kcat_forward=kcat, # assume forward and reverse have the same kcat
-            kcat_reverse=nothing,
+            gene_product_stoichiometry = Dict(grr .=> fill(1.0, size(grr))), # assume subunit stoichiometry of 1 for all isozymes
+            kcat_forward = kcat, # assume forward and reverse have the same kcat
+            kcat_reverse = nothing,
         )
     end
 end
@@ -50,10 +50,10 @@ capacity
 
 ec_solution = X.enzyme_constrained_flux_balance_analysis(
     model;
-    reaction_isozymes=float_reaction_isozymes,
+    reaction_isozymes = float_reaction_isozymes,
     gene_product_molar_masses,
     capacity,
-    optimizer=T.Optimizer,
+    optimizer = T.Optimizer,
 )
 
 ec_solution.fluxes
@@ -68,10 +68,7 @@ ec_solution.fluxes
 atpm_idx = findfirst(x -> x == "ATPM", A.reactions(model))
 biomass_idx = findfirst(x -> x == "r6", A.reactions(model))
 fixed_fluxes = [atpm_idx, biomass_idx]
-flux_values = [
-    ec_solution.fluxes["ATPM"],
-    ec_solution.fluxes["r6"],
-]
+flux_values = [ec_solution.fluxes["ATPM"], ec_solution.fluxes["r6"]]
 
 # Calculate OFMs
 
@@ -95,10 +92,8 @@ OFMs = get_ofms(Matrix(N), fixed_fluxes, flux_values)
     260.0 260.0
 ]#src
 
-OFM_dicts = [
-    Dict(A.reactions(model) .=> OFMs[:, 1]),
-    Dict(A.reactions(model) .=> OFMs[:, 2]),
-]
+OFM_dicts =
+    [Dict(A.reactions(model) .=> OFMs[:, 1]), Dict(A.reactions(model) .=> OFMs[:, 2])]
 
 # We see that the first OFM uses reactions 1,2,3,4,6 and ATPM, and the second OFM uses reactions 2,5,6 and ATPM.
 
@@ -138,8 +133,7 @@ rid_gcounts = Dict(
     rid => [v.gene_product_stoichiometry for (k, v) in d][1] for
     (rid, d) in float_reaction_isozymes
 )
-rid_pid =
-    Dict(rid => Ex(Symbol(rid)) for (rid, _) in rid_kcat)
+rid_pid = Dict(rid => Ex(Symbol(rid)) for (rid, _) in rid_kcat)
 
 
 sens = differentiate_ofm(
@@ -163,5 +157,9 @@ control
 
 # We now use the order of `parameters` to put this data into a DataFrame and see that reaction 3 and 4 control the usae of the first OFM, whereas reaction 5 controls the usage of the second OFM. Increasing the kcat value of reaction 3 by 1% would increase the flux through OFM₁ by 0.5%, increasing the kcat of reaction 4 by 1% would have the same effect, and increasing the kcat of reaction 5 by 1% would increase the flux through OFM₂ by 1%.
 
-df = DataFrame(Variable = ["λ₁","λ₂"], r3 = control[:,1], r4 = control[:,3], r5 = control[:,2])
-
+df = DataFrame(
+    Variable = ["λ₁", "λ₂"],
+    r3 = control[:, 1],
+    r4 = control[:, 3],
+    r5 = control[:, 2],
+)

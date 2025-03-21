@@ -13,9 +13,9 @@ include("../../test/simple_model.jl"); #hide
 
 model
 
-# Remove the ATPM reaction as we are only interested in the EFMs, not the OFMs
+model.reactions
 
-delete!(model.reactions, "ATPM")
+delete!(model.reactions, "ATPM") #src
 
 # Get the stoichiometric matrix of the model, this is what we use to find EFMs
 

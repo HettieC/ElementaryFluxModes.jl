@@ -14,7 +14,7 @@
 
 | **Documentation** | **Tests** | **Coverage** |
 |:---:|:---:|:---:|
-| [![docs-img-stable]][docs-url-stable] [![docs-img-dev]][docs-url-dev] | [![CI status][ci-img]][ci-url] | [![codecov][cov-img]][cov-url] | 
+| [![docs-img-stable]][docs-url-stable] [![docs-img-dev]][docs-url-dev] | [![CI status][ci-img]][ci-url] | [![codecov][cov-img]][cov-url] |
 
 This package provides a Julia implementation of the double description algorithm for enumerating elementary flux modes, and can algebraically differentiate the optimal use of these modes to calculate sensitivities.
 

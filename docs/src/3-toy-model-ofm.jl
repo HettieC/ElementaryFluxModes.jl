@@ -93,7 +93,7 @@ OFMs = get_ofms(Matrix(N), fixed_fluxes, flux_values)
 ]#src
 
 OFM_dicts = [
-    Dict(A.reactions(model) .=> OFMs[:, 1]), 
+    Dict(A.reactions(model) .=> OFMs[:, 1]),
     Dict(A.reactions(model) .=> OFMs[:, 2])
 ]
 

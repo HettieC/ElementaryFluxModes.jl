@@ -201,7 +201,7 @@ OFM_dicts = [
 OFM_dicts[1]["EX_etoh_e"]
 OFM_dicts[1]["EX_ac_e"]
 
-@test (OFM_dicts[1]["EX_ac_e"] ≈ 0 && OFM_dicts[1]["EX_etoh_e"] > 1e-3) ||
+@test (OFM_dicts[1]["EX_ac_e"] ≈ 0 && OFM_dicts[1]["EX_etoh_e"] > 1e-3) || #src
       (OFM_dicts[2]["EX_ac_e"] ≈ 0 && OFM_dicts[2]["EX_etoh_e"] > 1e-3) #src
 
 OFM_dicts[2]["EX_etoh_e"]
@@ -263,9 +263,9 @@ sens_perm = sortperm(scaled_sens[1, :])
 scaled_sens[:, sens_perm]
 parameters[sens_perm]
 
-@test scaled_sens[:, 1] ≈ [0.0011918020116688521, -0.0030478076348665565] ||
+@test scaled_sens[:, 1] ≈ [0.0011918020116688521, -0.0030478076348665565] || #src
       scaled_sens[:, 1] ≈ [-0.0030478076348665565, 0.0011918020116688521] #src
-@test scaled_sens[:, 33] ≈ [0.1264599684926767, -0.32339738790779676] ||
+@test scaled_sens[:, 33] ≈ [0.1264599684926767, -0.32339738790779676] || #src
       scaled_sens[:, 33] ≈ [-0.32339738790779676, 0.1264599684926767] #src
 
 f, a, hm = heatmap(

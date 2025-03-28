@@ -74,22 +74,22 @@ flux_values = [ec_solution.fluxes["ATPM"], ec_solution.fluxes["r6"]]
 
 OFMs = get_ofms(Matrix(N), fixed_fluxes, flux_values)
 
-@test OFMs ≈ [
-    10.0 10.0
-    270.0 0.0
-    270.0 270.0
-    270.0 0.0
-    270.0 0.0
-    0.0 270.0
-    260.0 260.0
-] || OFMs ≈ [
-    10.0 10.0
-    0.0 270.0
-    270.0 270.0
-    0.0 270.0
-    0.0 270.0
-    270.0 0.0
-    260.0 260.0
+@test OFMs ≈ [ #src
+    10.0 10.0 #src
+    270.0 0.0 #src
+    270.0 270.0 #src
+    270.0 0.0 #src
+    270.0 0.0 #src
+    0.0 270.0 #src
+    260.0 260.0 #src
+] || OFMs ≈ [ #src
+    10.0 10.0 #src
+    0.0 270.0 #src
+    270.0 270.0 #src
+    0.0 270.0 #src
+    0.0 270.0 #src
+    270.0 0.0 #src
+    260.0 260.0 #src
 ]#src
 
 OFM_dicts =

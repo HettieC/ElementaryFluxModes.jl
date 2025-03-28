@@ -12,6 +12,8 @@ import COBREXA as X
 using JSON
 import Tulip as T
 using CairoMakie
+using DataFrames
+
 
 @testset "ElementaryFluxModes.jl" begin
     @testset "Binary implementation of double dispatch EFMs" begin

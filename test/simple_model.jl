@@ -16,6 +16,12 @@ rs = [
         stoichiometry = Dict("m2" => 1),
     )
     AC.Reaction(;
+        name = "ATPM",
+        lower_bound = 0,
+        upper_bound = 1000,
+        stoichiometry = Dict("m4" => -1),
+    )
+    AC.Reaction(;
         name = "r3",
         lower_bound = 0,
         upper_bound = 1000,
@@ -27,14 +33,14 @@ rs = [
         lower_bound = 0,
         upper_bound = 1000,
         stoichiometry = Dict("m3" => -1, "m4" => 1),
-        gene_association_dnf = [["g2"], ["g3"]],
+        gene_association_dnf = [["g2"]],
     )
     AC.Reaction(;
         name = "r5",
         lower_bound = 0,
         upper_bound = 1000,
         stoichiometry = Dict("m2" => -1, "m4" => 1),
-        gene_association_dnf = [["g4", "g5"]],
+        gene_association_dnf = [["g3", "g4"]],
     )
     AC.Reaction(;
         name = "r6",
@@ -57,7 +63,6 @@ gs = [
     AC.Gene(; name = "g2")
     AC.Gene(; name = "g3")
     AC.Gene(; name = "g4")
-    AC.Gene(; name = "g5")
 ]
 
 model = AC.Model(
@@ -66,15 +71,14 @@ model = AC.Model(
     genes = Dict(x.name => x for x in gs),
 )
 
-gene_product_molar_masses =
-    Dict("g1" => 1.0, "g2" => 1.0, "g3" => 1.0, "g4" => 1.0, "g5" => 1.0)
+gene_product_molar_masses = Dict("g1" => 1.0, "g2" => 1.0, "g3" => 1.0, "g4" => 1.0)
 
 rid_kcat = Dict("r3" => 10.0, "r4" => 10.0, "r5" => 5.0)
 
-capacity = [("pool_1", ["g1", "g2", "g3"], 10.0), ("pool_2", ["g4", "g5"], 10.0)]
+capacity = [("pool_1", ["g1", "g2"], 10.0), ("pool_2", ["g3", "g4"], 10.0)]
 
 rid_gcounts = Dict(
     "r3" => Dict("g1" => 1.0),
     "r4" => Dict("g2" => 1.0),
-    "r5" => Dict("g4" => 1.0, "g5" => 1.0),
+    "r5" => Dict("g3" => 1.0, "g4" => 1.0),
 )

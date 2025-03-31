@@ -11,8 +11,11 @@ import AbstractFBCModels as A
 
 include("../../test/simple_model.jl"); #hide
 
-
 model
+
+model.reactions
+
+delete!(model.reactions, "ATPM") #src
 
 # Get the stoichiometric matrix of the model, this is what we use to find EFMs
 

@@ -12,6 +12,8 @@ import COBREXA as X
 using JSON
 import Tulip as T
 using CairoMakie
+using DataFrames
+
 
 @testset "ElementaryFluxModes.jl" begin
     @testset "Binary implementation of double dispatch EFMs" begin
@@ -20,11 +22,14 @@ using CairoMakie
     @testset "Toy model EFMs" begin
         include("../docs/src/1-toy-model.jl")
     end
-    @testset "Toy model differentiate" begin 
+    @testset "Toy model EFMs sensitivity" begin
         include("../docs/src/2-differentiate.jl")
     end
-    @testset "E. coli core OFMs" begin 
-        include("../docs/src/3-ecoli-core.jl")
+    @testset "Toy model OFMs sensitivity" begin
+        include("../docs/src/3-toy-model-ofm.jl")
+    end
+    @testset "E. coli core OFMs" begin
+        include("../docs/src/4-ecoli-core.jl")
     end
 
 end

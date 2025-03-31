@@ -90,7 +90,7 @@ OFMs = get_ofms(Matrix(N), fixed_fluxes, flux_values)
     0.0 270.0 #src
     270.0 0.0 #src
     260.0 260.0 #src
-]#src
+] #src
 
 OFM_dicts =
     [Dict(A.reactions(model) .=> OFMs[:, 1]), Dict(A.reactions(model) .=> OFMs[:, 2])]
@@ -116,7 +116,7 @@ v = [
 
 λ = M \ v
 
-@test λ ≈ [173.33333332 86.66666666]'
+@test λ ≈ [173.33333332 86.66666666]' #src
 # Two thirds of the optimal flux is provided by the first OFM (using r2 and r3), and the remaining third by the second OFM (using r4).
 
 # ## Differentiate the OFM usage

@@ -41,13 +41,13 @@ for rid in A.reactions(model)
         d["isozyme_$i"] = X.IsozymeT{Ex}(
             gene_product_stoichiometry = Dict(grr .=> fill(float(1.0), size(grr))), # assume subunit stoichiometry of 1 for all isozymes
             kcat_forward = Ex(Symbol(rid)),
-            kcat_reverse = 0.0,
+            kcat_reverse = nothing,
         )
         d2 = get!(float_reaction_isozymes, rid, Dict{String,X.Isozyme}()) #src
         d2["isozyme_$i"] = X.Isozyme( #src
             gene_product_stoichiometry = Dict(grr .=> fill(1.0, size(grr))), #src
             kcat_forward = kcat, #src
-            kcat_reverse = 0.0, #src
+            kcat_reverse = nothing, #src
         ) #src
     end
 end
@@ -69,6 +69,8 @@ ec_solution = D.optimized_values(
 
 ec_solution.tree.fluxes
 
+# We see that the reaction ATPM is not used in the optimal solution, so we remove this reaction from the model.
+
 ec_solution_fba = enzyme_constrained_flux_balance_analysis( #src
     model; #src
     reaction_isozymes = float_reaction_isozymes, #src
@@ -78,6 +80,23 @@ ec_solution_fba = enzyme_constrained_flux_balance_analysis( #src
 ) #src
 
 @test isapprox(ec_solution.tree.objective, ec_solution_fba.objective; atol = 1e-8) #src
+
+delete!(model.reactions, "ATPM")
+km = enzyme_constrained_flux_balance_constraints( # kinetic model
+    model;
+    reaction_isozymes,
+    gene_product_molar_masses,
+    capacity,
+)
+
+ec_solution = D.optimized_values(
+    km,
+    parameter_values;
+    objective = km.objective.value,
+    optimizer = T.Optimizer,
+    settings = [X.set_optimizer_attribute("IPM_IterationsLimit", 10_000)],
+)
+ec_solution.tree.fluxes
 
 # We have a solution that uses every reaction, and the enzyme capacities are both full.
 # Therefore, we may calculate the EFMs of this solution and directly differentiate

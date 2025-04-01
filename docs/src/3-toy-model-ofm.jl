@@ -33,11 +33,11 @@ for (rid, rxn) in model.reactions
 
         kcat = rid_kcat[rid] 
 
-        d = get!(float_reaction_isozymes, rid, Dict{String,X.Isozyme}()) #src
-        d["isozyme_$i"] = X.Isozyme( #src
-            gene_product_stoichiometry = Dict(grr .=> fill(1.0, size(grr))), #src
-            kcat_forward = kcat, #src
-            kcat_reverse = nothing, #src
+        d = get!(float_reaction_isozymes, rid, Dict{String,X.Isozyme}()) 
+        d["isozyme_$i"] = X.Isozyme( 
+            gene_product_stoichiometry = Dict(grr .=> fill(1.0, size(grr))), 
+            kcat_forward = kcat, 
+            kcat_reverse = nothing,
         )
     end
 end

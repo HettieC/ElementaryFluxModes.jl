@@ -31,12 +31,12 @@ for (rid, rxn) in model.reactions
     haskey(rid_kcat, rid) || continue # skip if no kcat data available
     for (i, grr) in enumerate(grrs)
 
-        kcat = rid_kcat[rid] * 3.6 # change unit to k/h
+        kcat = rid_kcat[rid]
 
         d = get!(float_reaction_isozymes, rid, Dict{String,X.Isozyme}())
-        d["$(rid)_$i"] = X.Isozyme(
-            gene_product_stoichiometry = Dict(grr .=> fill(1.0, size(grr))), # assume subunit stoichiometry of 1 for all isozymes
-            kcat_forward = kcat, # assume forward and reverse have the same kcat
+        d["isozyme_$i"] = X.Isozyme(
+            gene_product_stoichiometry = Dict(grr .=> fill(1.0, size(grr))),
+            kcat_forward = kcat,
             kcat_reverse = nothing,
         )
     end
@@ -76,20 +76,20 @@ OFMs = get_ofms(Matrix(N), fixed_fluxes, flux_values)
 
 @test OFMs ≈ [ #src
     10.0 10.0 #src
-    270.0 0.0 #src
-    270.0 270.0 #src
-    270.0 0.0 #src
-    270.0 0.0 #src
-    0.0 270.0 #src
-    260.0 260.0 #src
+    75.0 0.0 #src
+    75.0 75.0 #src
+    75.0 0.0 #src
+    75.0 0.0 #src
+    0.0 75.0 #src
+    65.0 65.0 #src
 ] || OFMs ≈ [ #src
     10.0 10.0 #src
-    0.0 270.0 #src
-    270.0 270.0 #src
-    0.0 270.0 #src
-    0.0 270.0 #src
-    270.0 0.0 #src
-    260.0 260.0 #src
+    0.0 75.0 #src
+    75.0 75.0 #src
+    0.0 75.0 #src
+    0.0 75.0 #src
+    75 0.0 #src
+    65.0 65.0 #src
 ] #src
 
 OFM_dicts =
@@ -116,8 +116,10 @@ v = [
 
 λ = M \ v
 
-@test λ ≈ [173.33333332 86.66666666]' #src
-# Two thirds of the optimal flux is provided by the first OFM (using r2 and r3), and the remaining third by the second OFM (using r4).
+λ ./ sum(λ)
+
+@test λ ./ sum(λ) ≈ [0.6666666667049761 0.33333333329502396]' #src
+# Two thirds of the optimal flux is provided by the first OFM (using r3 and r4), and the remaining third by the second OFM (using r5).
 
 # ## Differentiate the OFM usage
 
@@ -155,7 +157,7 @@ for (i, col) in enumerate(eachcol(sens))
 end
 control
 
-# We now use the order of `parameters` to put this data into a DataFrame and see that reaction 3 and 4 control the usae of the first OFM, whereas reaction 5 controls the usage of the second OFM. Increasing the kcat value of reaction 3 by 1% would increase the flux through OFM₁ by 0.5%, increasing the kcat of reaction 4 by 1% would have the same effect, and increasing the kcat of reaction 5 by 1% would increase the flux through OFM₂ by 1%.
+# We now use the order of `parameters` to put this data into a DataFrame, where each entry corresponds to the control coefficient (p/λ)*dλ/dp for p as the kcat of r3, r4 or r5, and for λ₁ and λ₂. We see that reaction 3 and 4 control the usage of the first OFM, whereas reaction 5 controls the usage of the second OFM. Increasing the kcat value of reaction 3 by 1% would increase the flux through OFM₁ by 0.5%, increasing the kcat of reaction 4 by 1% would have the same effect, and increasing the kcat of reaction 5 by 1% would increase the flux through OFM₂ by 1%.
 
 df = DataFrame(
     Variable = ["λ₁", "λ₂"],

@@ -23,12 +23,12 @@ for (rid, rxn) in model.reactions
     haskey(rid_kcat, rid) || continue # skip if no kcat data available
     for (i, grr) in enumerate(grrs)
 
-        kcat = rid_kcat[rid] * 3.6 # change unit to k/h
+        kcat = rid_kcat[rid]
 
         d = get!(float_reaction_isozymes, rid, Dict{String,X.Isozyme}())
-        d[&quot;$(rid)_$i&quot;] = X.Isozyme(
-            gene_product_stoichiometry = Dict(grr .=&gt; fill(1.0, size(grr))), # assume subunit stoichiometry of 1 for all isozymes
-            kcat_forward = kcat, # assume forward and reverse have the same kcat
+        d[&quot;isozyme_$i&quot;] = X.Isozyme(
+            gene_product_stoichiometry = Dict(grr .=&gt; fill(1.0, size(grr))),
+            kcat_forward = kcat,
             kcat_reverse = nothing,
         )
     end
@@ -48,28 +48,28 @@ capacity</code></pre><pre class="documenter-example-output"><code class="nohighl
 
 ec_solution.fluxes</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">ConstraintTrees.Tree{Float64} with 7 elements:
   :ATPM =&gt; 10.0
-  :r1   =&gt; 180.0
-  :r2   =&gt; 270.0
-  :r3   =&gt; 180.0
-  :r4   =&gt; 180.0
-  :r5   =&gt; 90.0
-  :r6   =&gt; 260.0</code></pre><p>This optimal solution uses every reaction in the model, and since we have an enzyme capacity with two enzyme pools, theory has shown that there must be two OFMs in this optimal solution, and the optimal proportion of their flux is unique.</p><p>To calculate these OFMs, we require the index and optimal value of ATPM and the objective reaction r6</p><pre><code class="language-julia hljs">atpm_idx = findfirst(x -&gt; x == &quot;ATPM&quot;, A.reactions(model))
+  :r1   =&gt; 50.0
+  :r2   =&gt; 75.0
+  :r3   =&gt; 50.0
+  :r4   =&gt; 50.0
+  :r5   =&gt; 25.0
+  :r6   =&gt; 65.0</code></pre><p>This optimal solution uses every reaction in the model, and since we have an enzyme capacity with two enzyme pools, theory has shown that there must be two OFMs in this optimal solution, and the optimal proportion of their flux is unique.</p><p>To calculate these OFMs, we require the index and optimal value of ATPM and the objective reaction r6</p><pre><code class="language-julia hljs">atpm_idx = findfirst(x -&gt; x == &quot;ATPM&quot;, A.reactions(model))
 biomass_idx = findfirst(x -&gt; x == &quot;r6&quot;, A.reactions(model))
 fixed_fluxes = [atpm_idx, biomass_idx]
 flux_values = [ec_solution.fluxes[&quot;ATPM&quot;], ec_solution.fluxes[&quot;r6&quot;]]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{Float64}:
-  10.000000003628772
- 259.99999998916263</code></pre><p>Calculate OFMs</p><pre><code class="language-julia hljs">OFMs = get_ofms(Matrix(N), fixed_fluxes, flux_values)
+ 10.000000009315372
+ 64.99999995333822</code></pre><p>Calculate OFMs</p><pre><code class="language-julia hljs">OFMs = get_ofms(Matrix(N), fixed_fluxes, flux_values)
 
 
 OFM_dicts =
     [Dict(A.reactions(model) .=&gt; OFMs[:, 1]), Dict(A.reactions(model) .=&gt; OFMs[:, 2])]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{Dict{String, Float64}}:
- Dict(&quot;r1&quot; =&gt; 269.9999999927914, &quot;r2&quot; =&gt; 269.9999999927914, &quot;r5&quot; =&gt; 0.0, &quot;ATPM&quot; =&gt; 10.000000003628772, &quot;r6&quot; =&gt; 259.99999998916263, &quot;r3&quot; =&gt; 269.9999999927914, &quot;r4&quot; =&gt; 269.9999999927914)
- Dict(&quot;r1&quot; =&gt; 0.0, &quot;r2&quot; =&gt; 269.9999999927914, &quot;r5&quot; =&gt; 269.9999999927914, &quot;ATPM&quot; =&gt; 10.000000003628772, &quot;r6&quot; =&gt; 259.99999998916263, &quot;r3&quot; =&gt; 0.0, &quot;r4&quot; =&gt; 0.0)</code></pre><p>We see that the first OFM uses reactions 1,2,3,4,6 and ATPM, and the second OFM uses reactions 2,5,6 and ATPM.</p><pre><code class="language-julia hljs">OFM_dicts = [
+ Dict(&quot;r1&quot; =&gt; 74.99999996265359, &quot;r2&quot; =&gt; 74.99999996265359, &quot;r5&quot; =&gt; 0.0, &quot;ATPM&quot; =&gt; 10.000000009315372, &quot;r6&quot; =&gt; 64.99999995333822, &quot;r3&quot; =&gt; 74.99999996265359, &quot;r4&quot; =&gt; 74.99999996265359)
+ Dict(&quot;r1&quot; =&gt; 0.0, &quot;r2&quot; =&gt; 74.99999996265359, &quot;r5&quot; =&gt; 74.99999996265359, &quot;ATPM&quot; =&gt; 10.000000009315372, &quot;r6&quot; =&gt; 64.99999995333822, &quot;r3&quot; =&gt; 0.0, &quot;r4&quot; =&gt; 0.0)</code></pre><p>We see that the first OFM uses reactions 1,2,3,4,6 and ATPM, and the second OFM uses reactions 2,5,6 and ATPM.</p><pre><code class="language-julia hljs">OFM_dicts = [
     Dict(x =&gt; y / OFM_dicts[1][&quot;r6&quot;] for (x, y) in OFM_dicts[1]),
     Dict(x =&gt; y / OFM_dicts[2][&quot;r6&quot;] for (x, y) in OFM_dicts[2]),
 ]</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{Dict{String, Float64}}:
- Dict(&quot;r1&quot; =&gt; 1.0384615384770983, &quot;r2&quot; =&gt; 1.0384615384770983, &quot;r5&quot; =&gt; 0.0, &quot;ATPM&quot; =&gt; 0.03846153847709844, &quot;r6&quot; =&gt; 1.0, &quot;r3&quot; =&gt; 1.0384615384770983, &quot;r4&quot; =&gt; 1.0384615384770983)
- Dict(&quot;r1&quot; =&gt; 0.0, &quot;r2&quot; =&gt; 1.0384615384770983, &quot;r5&quot; =&gt; 1.0384615384770983, &quot;ATPM&quot; =&gt; 0.03846153847709844, &quot;r6&quot; =&gt; 1.0, &quot;r3&quot; =&gt; 0.0, &quot;r4&quot; =&gt; 0.0)</code></pre><p>Calculate proportion of the OFMs used in the optimal solution</p><pre><code class="language-julia hljs">M = [
+ Dict(&quot;r1&quot; =&gt; 1.1538461540999094, &quot;r2&quot; =&gt; 1.1538461540999094, &quot;r5&quot; =&gt; 0.0, &quot;ATPM&quot; =&gt; 0.15384615409990934, &quot;r6&quot; =&gt; 1.0, &quot;r3&quot; =&gt; 1.1538461540999094, &quot;r4&quot; =&gt; 1.1538461540999094)
+ Dict(&quot;r1&quot; =&gt; 0.0, &quot;r2&quot; =&gt; 1.1538461540999094, &quot;r5&quot; =&gt; 1.1538461540999094, &quot;ATPM&quot; =&gt; 0.15384615409990934, &quot;r6&quot; =&gt; 1.0, &quot;r3&quot; =&gt; 0.0, &quot;r4&quot; =&gt; 0.0)</code></pre><p>Calculate proportion of the OFMs used in the optimal solution</p><pre><code class="language-julia hljs">M = [
     OFM_dicts[1][&quot;r5&quot;] OFM_dicts[2][&quot;r5&quot;]
     OFM_dicts[1][&quot;r1&quot;] OFM_dicts[2][&quot;r1&quot;]
 ]
@@ -79,9 +79,11 @@ v = [
     ec_solution.fluxes[&quot;r1&quot;]
 ]
 
-λ = M \ v</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{Float64}:
- 173.33333332489386
-  86.66666666426643</code></pre><p>Two thirds of the optimal flux is provided by the first OFM (using r2 and r3), and the remaining third by the second OFM (using r4).</p><h2 id="Differentiate-the-OFM-usage"><a class="docs-heading-anchor" href="#Differentiate-the-OFM-usage">Differentiate the OFM usage</a><a id="Differentiate-the-OFM-usage-1"></a><a class="docs-heading-anchor-permalink" href="#Differentiate-the-OFM-usage" title="Permalink"></a></h2><p>It remains to differentiate to find the sensitivities of the OFM usage to the model parameters. For this, we must set up parameter isozymes.</p><pre><code class="language-julia hljs">parameter_values = Dict(
+λ = M \ v
+
+λ ./ sum(λ)</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2-element Vector{Float64}:
+ 0.6666666667049761
+ 0.33333333329502396</code></pre><p>Two thirds of the optimal flux is provided by the first OFM (using r3 and r4), and the remaining third by the second OFM (using r5).</p><h2 id="Differentiate-the-OFM-usage"><a class="docs-heading-anchor" href="#Differentiate-the-OFM-usage">Differentiate the OFM usage</a><a id="Differentiate-the-OFM-usage-1"></a><a class="docs-heading-anchor-permalink" href="#Differentiate-the-OFM-usage" title="Permalink"></a></h2><p>It remains to differentiate to find the sensitivities of the OFM usage to the model parameters. For this, we must set up parameter isozymes.</p><pre><code class="language-julia hljs">parameter_values = Dict(
     Symbol(x) =&gt; iso.kcat_forward for (x, y) in float_reaction_isozymes for (_, iso) in y
 )
 
@@ -103,16 +105,16 @@ sens = differentiate_ofm(
     gene_product_molar_masses,
     T.Optimizer,
 )</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2×3 Matrix{Float64}:
-  2.40741  -0.0       2.40741
- -0.0       4.81481  -0.0</code></pre><p>We may scale these sensitivities to calculate the control coefficients, (p/λ)*dλ/dp</p><pre><code class="language-julia hljs">control = Matrix(undef, size(sens, 1), size(sens, 2))
+  2.16667  -0.0       2.16667
+ -0.0       4.33333  -0.0</code></pre><p>We may scale these sensitivities to calculate the control coefficients, (p/λ)*dλ/dp</p><pre><code class="language-julia hljs">control = Matrix(undef, size(sens, 1), size(sens, 2))
 for (i, col) in enumerate(eachcol(sens))
     control[:, i] = collect(values(parameter_values))[i] .* col ./ λ
 end
 control</code></pre><pre class="documenter-example-output"><code class="nohighlight hljs ansi">2×3 Matrix{Any}:
   0.5  -0.0   0.5
- -0.0   1.0  -0.0</code></pre><p>We now use the order of <code>parameters</code> to put this data into a DataFrame and see that reaction 3 and 4 control the usae of the first OFM, whereas reaction 5 controls the usage of the second OFM. Increasing the kcat value of reaction 3 by 1% would increase the flux through OFM₁ by 0.5%, increasing the kcat of reaction 4 by 1% would have the same effect, and increasing the kcat of reaction 5 by 1% would increase the flux through OFM₂ by 1%.</p><pre><code class="language-julia hljs">df = DataFrame(
+ -0.0   1.0  -0.0</code></pre><p>We now use the order of <code>parameters</code> to put this data into a DataFrame, where each entry corresponds to the control coefficient (p/λ)*dλ/dp for p as the kcat of r3, r4 or r5, and for λ₁ and λ₂. We see that reaction 3 and 4 control the usage of the first OFM, whereas reaction 5 controls the usage of the second OFM. Increasing the kcat value of reaction 3 by 1% would increase the flux through OFM₁ by 0.5%, increasing the kcat of reaction 4 by 1% would have the same effect, and increasing the kcat of reaction 5 by 1% would increase the flux through OFM₂ by 1%.</p><pre><code class="language-julia hljs">df = DataFrame(
     Variable = [&quot;λ₁&quot;, &quot;λ₂&quot;],
     r3 = control[:, 1],
     r4 = control[:, 3],
     r5 = control[:, 2],
-)</code></pre><div><div style = "float: left;"><span>2×4 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "header"><th class = "rowNumber" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">Variable</th><th style = "text-align: left;">r3</th><th style = "text-align: left;">r4</th><th style = "text-align: left;">r5</th></tr><tr class = "subheader headerLastRow"><th class = "rowNumber" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "Any" style = "text-align: left;">Any</th><th title = "Any" style = "text-align: left;">Any</th><th title = "Any" style = "text-align: left;">Any</th></tr></thead><tbody><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">λ₁</td><td style = "text-align: left;">0.5</td><td style = "text-align: left;">0.5</td><td style = "text-align: left;">-0.0</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">λ₂</td><td style = "text-align: left;">-0.0</td><td style = "text-align: left;">-0.0</td><td style = "text-align: left;">1.0</td></tr></tbody></table></div><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../2-differentiate/">« Sensitivities of the EFMs of a toy model</a><a class="docs-footer-nextpage" href="../4-ecoli-core/">Sensitivities of OFMs in <em>E. coli</em> core »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.10.0 on <span class="colophon-date" title="Monday 31 March 2025 09:18">Monday 31 March 2025</span>. Using Julia version 1.11.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
+)</code></pre><div><div style = "float: left;"><span>2×4 DataFrame</span></div><div style = "clear: both;"></div></div><div class = "data-frame" style = "overflow-x: scroll;"><table class = "data-frame" style = "margin-bottom: 6px;"><thead><tr class = "header"><th class = "rowNumber" style = "font-weight: bold; text-align: right;">Row</th><th style = "text-align: left;">Variable</th><th style = "text-align: left;">r3</th><th style = "text-align: left;">r4</th><th style = "text-align: left;">r5</th></tr><tr class = "subheader headerLastRow"><th class = "rowNumber" style = "font-weight: bold; text-align: right;"></th><th title = "String" style = "text-align: left;">String</th><th title = "Any" style = "text-align: left;">Any</th><th title = "Any" style = "text-align: left;">Any</th><th title = "Any" style = "text-align: left;">Any</th></tr></thead><tbody><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">1</td><td style = "text-align: left;">λ₁</td><td style = "text-align: left;">0.5</td><td style = "text-align: left;">0.5</td><td style = "text-align: left;">-0.0</td></tr><tr><td class = "rowNumber" style = "font-weight: bold; text-align: right;">2</td><td style = "text-align: left;">λ₂</td><td style = "text-align: left;">-0.0</td><td style = "text-align: left;">-0.0</td><td style = "text-align: left;">1.0</td></tr></tbody></table></div><hr/><p><em>This page was generated using <a href="https://github.com/fredrikekre/Literate.jl">Literate.jl</a>.</em></p></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="../2-differentiate/">« Sensitivities of the EFMs of a toy model</a><a class="docs-footer-nextpage" href="../4-ecoli-core/">Sensitivities of OFMs in <em>E. coli</em> core »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="auto">Automatic (OS)</option><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option><option value="catppuccin-latte">catppuccin-latte</option><option value="catppuccin-frappe">catppuccin-frappe</option><option value="catppuccin-macchiato">catppuccin-macchiato</option><option value="catppuccin-mocha">catppuccin-mocha</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 1.10.1 on <span class="colophon-date" title="Tuesday 1 April 2025 12:05">Tuesday 1 April 2025</span>. Using Julia version 1.11.4.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>

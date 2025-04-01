@@ -31,12 +31,12 @@ for (rid, rxn) in model.reactions
     haskey(rid_kcat, rid) || continue # skip if no kcat data available
     for (i, grr) in enumerate(grrs)
 
-        kcat = rid_kcat[rid] 
+        kcat = rid_kcat[rid]
 
-        d = get!(float_reaction_isozymes, rid, Dict{String,X.Isozyme}()) 
-        d["isozyme_$i"] = X.Isozyme( 
-            gene_product_stoichiometry = Dict(grr .=> fill(1.0, size(grr))), 
-            kcat_forward = kcat, 
+        d = get!(float_reaction_isozymes, rid, Dict{String,X.Isozyme}())
+        d["isozyme_$i"] = X.Isozyme(
+            gene_product_stoichiometry = Dict(grr .=> fill(1.0, size(grr))),
+            kcat_forward = kcat,
             kcat_reverse = nothing,
         )
     end
@@ -116,9 +116,9 @@ v = [
 
 λ = M \ v
 
-λ./sum(λ)
+λ ./ sum(λ)
 
-@test λ./sum(λ) ≈ [0.6666666667049761 0.33333333329502396]' #src
+@test λ ./ sum(λ) ≈ [0.6666666667049761 0.33333333329502396]' #src
 # Two thirds of the optimal flux is provided by the first OFM (using r3 and r4), and the remaining third by the second OFM (using r5).
 
 # ## Differentiate the OFM usage

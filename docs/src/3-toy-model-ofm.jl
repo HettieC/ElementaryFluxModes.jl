@@ -125,7 +125,6 @@ v = [
 
 # It remains to differentiate to find the sensitivities of the OFM usage to the model parameters. For this, we must set up parameter isozymes.
 
-
 parameter_values = Dict(
     Symbol(x) => iso.kcat_forward for (x, y) in float_reaction_isozymes for (_, iso) in y
 )
@@ -149,7 +148,91 @@ sens = differentiate_ofm(
     T.Optimizer,
 )
 
+###########
+D_eval =
+        float.(
+            ElementaryFluxModes._cost_matrix(
+                OFM_dicts,
+                rid_pid,
+                rid_gcounts,
+                capacity,
+                gene_product_molar_masses;
+                evaluate = true,
+                parameter_values,
+            )
+        )
+n_vars = size(D_eval, 2)
+efm_opt = ElementaryFluxModes.JuMP.Model(T.Optimizer)
+ElementaryFluxModes.JuMP.@variable(efm_opt, z[1:n_vars])
+ElementaryFluxModes.JuMP.@constraint(efm_opt, eq, D_eval * z == [1; 1])
+
+ElementaryFluxModes.JuMP.@objective(efm_opt, Max, sum(z))
+ElementaryFluxModes.JuMP.optimize!(efm_opt)
+
+    x = ElementaryFluxModes.JuMP.value.(efm_opt[:z])
+    ν = ElementaryFluxModes.JuMP.dual.(efm_opt[:eq])
+
+    D =
+        ElementaryFluxModes.FastDifferentiation.Node.(
+            ElementaryFluxModes._cost_matrix(OFM_dicts, rid_pid, rid_gcounts, capacity, gene_product_molar_masses)
+        )
+
+    # define L, the gradient of the Lagrangian
+    L(x, ν, parameters) = [
+        ones(n_vars) + D' * ν
+        D * x - ones(n_vars)
+    ]
+    # differentiate L wrt x,ν, the variables
+    dl_vars = [
+        ElementaryFluxModes.SparseArrays.spzeros(n_vars, n_vars) D_eval'
+        D_eval ElementaryFluxModes.SparseArrays.spzeros(n_vars, n_vars)
+    ]
+
+    # differentiate L wrt parameters
+    dL_params(x, ν, parameters) =
+        ElementaryFluxModes.FastDifferentiation.jacobian(L(x, ν, parameters), parameters)
+    # substitute parameter values:
+    dL_params_eval =
+        ElementaryFluxModes.FastDifferentiation.make_function(dL_params(x, ν, parameters), parameters)
+    param_vals = float.(collect(values(parameter_values)))
+
+    dx = -Array(dl_vars) \ dL_params_eval(param_vals)
+
+############
 # We may scale these sensitivities to calculate the control coefficients, (p/λ)*dλ/dp
+
+old_r3_kcat = parameter_values[:r3] #src
+float_reaction_isozymes["r3"]["isozyme_1"].kcat_forward *= 1.001 #src
+kcat_diff = float_reaction_isozymes["r3"]["isozyme_1"].kcat_forward - old_r3_kcat #src
+fin_diff_sol = X.enzyme_constrained_flux_balance_analysis( #src
+    model; #src
+    reaction_isozymes = float_reaction_isozymes, #src
+    gene_product_molar_masses, #src
+    capacity, #src
+    optimizer = T.Optimizer, #src
+) #src
+
+flux_values_new = [fin_diff_sol.fluxes["ATPM"], fin_diff_sol.fluxes["r6"]] #src
+
+OFMs_new = get_ofms(Matrix(N), fixed_fluxes, flux_values_new) #src
+OFMs_new ./= OFMs_new[7,:]' 
+
+M_new = [ #src
+    OFMs_new[2,1] OFMs_new[2,2] #src
+    OFMs_new[6,1] OFMs_new[6,2] #src
+] #src
+
+v_new = [ #src
+    fin_diff_sol.fluxes["r1"] #src
+    fin_diff_sol.fluxes["r5"] #src
+] #src
+
+λ_new = M_new \ v_new #src
+
+fd_sens = (λ_new - λ) / kcat_diff #src
+
+@test  #src
+
 
 control = Matrix(undef, size(sens, 1), size(sens, 2))
 for (i, col) in enumerate(eachcol(sens))
